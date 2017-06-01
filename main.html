@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!--A general Parallel Coordinates-based viewer for Spec-D cineme databases
+Version 1.0-->
+<html lang='en'>
+<head>
+	<title>Cinema Database Explorer</title>
+	<meta charset="utf-8">
+	<meta name='author' content="James Ahrens">
+	<meta name='author' content="Cameron Tauxe">
+	<link rel='stylesheet' href='css/parallelCoordinates.css'>
+	<link rel='stylesheet' href='css/viewer.css'>
+	<script src="lib/d3.v3.min.js"></script>
+	<script src = 'lib/ParallelCoordinatesChart.js'></script>
+</head>
+<body>
+	<div id="top">
+		<div id="header">
+			<h1>Cinema Database Explorer</h1>
+			<div id="databaseControls">
+				<span id="databaseLabel">Select Database:</span>
+				<br>
+				<select id="database"></select>
+				<button id="loadButton" onclick="load()">Load</button>
+			</div>
+		</div>
+		<div id="svgArea">
+			<div id="svgContainer"></div>
+		</div>
+		<div id="controlsArea">
+			<div id="pageSizeControls" class="controlPanel">
+				<span id="pageSizeLabel">Results Per Page:</span>
+				<br>
+				<select id="pageSize" onchange="updatePageSize()">
+					<option value="10">10</option>
+					<option value="25" selected="true">25</option>
+					<option value="50">50</option>
+					<option value="100">100</option>
+				</select>
+			</div>
+			<div id="sortControls" class="controlPanel">
+				<span id="sortLabel">Sort By:</span>
+				<br>
+				<select id="sort" onchange="updateSort()"></select>
+			</div>
+			<div id="imageSizeControls" class="controlPanel">
+				<span id="imageSizeLabel">Image Size:</span>
+				<br>
+				<input id="imageSize" type="range" min="100" max="500" default="350" oninput="updateImageSize()">
+			</div>
+		</div>
+		<div id="resizeBar"></div>
+	</div>
+	<div id="resultsArea"></div>
+
+	<script>
+		//Init variables
+		var databases;//An array of the databases (loaded from databases.json)
+		var currentDb;//The currently loaded database
+		var chart;//The Parallel Coordinates Chart
+		var currentResults = [];//The Array of selected results from the chart
+		var loaded = false;
+
+		var currentPage = 1;
+
+		//Load databases.json and register databases into the database selection
+		//then load the first one
+		var jsonRequest = new XMLHttpRequest();
+		jsonRequest.open("GET",'databases.json',true);
+		jsonRequest.onreadystatechange = function() {
+			if (jsonRequest.readyState === 4) {
+				if (jsonRequest.status === 200 || jsonRequest.status === 0) {
+					databases = JSON.parse(jsonRequest.responseText);
+					d3.select('#database').selectAll('option')
+						.data(databases)
+						.enter().append('option')
+							.attr('value',function(d,i){return i;})
+							.text(function(d) {
+								return d.name ? d.name: d.directory;
+							});
+					load();
+				}
+			}
+		}
+		jsonRequest.send(null);
+
+		//init margins and image size
+		updateResultMargins();
+		updateImageSize();
+
+		//Set up dragging on the resize bar
+		var resizeDrag = d3.behavior.drag()
+			.on('dragstart', function() {
+				d3.select(this).attr('mode', 'dragging');
+			})
+			.on('drag', function() {
+				var headerRect = d3.select('#header').node().getBoundingClientRect();
+				var controlsRect = d3.select('#controlsArea').node().getBoundingClientRect();
+				d3.select('#svgArea').style('height',(d3.event.y - headerRect.height - controlsRect.height)+'px');
+				updateResultMargins();
+				chart.updateSize();
+			})
+			.on('dragend', function() {
+				d3.select(this).attr('mode', 'default');
+			});
+		d3.select('#resizeBar').call(resizeDrag);
+
+		//Resize chart and update margins when window is resized
+		window.onresize = function(){
+			if (loaded)
+				chart.updateSize();
+			updateResultMargins();
+		};
+
+		//*********
+		//END MAIN THREAD
+		//FUNCTION DEFINITIONS BELOW
+		//*********
+
+		/**
+		 * Set the current database to the one selected in the database selection
+		 * and load it, replacing the chart with a new one
+		 */
+		function load() {
+			var loaded = false;
+			currentDb = databases[d3.select('#database').node().value];
+			d3.select('#svgContainer').html('');
+			chart = new ParallelCoordinatesChart(d3.select('#svgContainer'),
+												currentDb.directory+'/'+currentDb.csv,
+												doneLoading,
+												onSelectionChange,
+												updateInfoPane);
+		}
+
+		/**
+		 * Called when a database finishes loading.
+		 * Fills the sort selection with the new database's dimensions,
+		 */
+		function doneLoading() {
+			loaded = true;
+
+			d3.select('#sort').selectAll('option')
+				.data(chart.dimensions)
+				.enter().append('option')
+					.attr('value',function(d){return d;})
+					.text(function(d){return d;})
+		}
+
+		/**
+		 * Called when the selection in the chart changes.
+		 * Updates currentResults, sorts, and repopulates the results area
+		 */
+		function onSelectionChange(query) {
+			currentResults = query.slice();//clone query
+			var d = d3.select('#sort').node().value;
+			currentResults.sort(function(a,b) {
+				return chart.results[a][d] - chart.results[b][d];
+			});
+			updatePageNav();
+			populateResults();
+		}
+
+		//Update the image size when the slider for it is moved
+		function updateImageSize() {
+			var width = d3.select('#imageSize').node().value;
+			d3.selectAll('.resultView').style('width',width+'px');
+			d3.select('#imageSizeLabel').text('Image Size: ' + width + 'px');
+		}
+
+		//Update the results per page when its changed
+		function updatePageSize() {
+			if (loaded) {
+				updatePageNav();
+				populateResults();
+			}
+		}
+
+		//Reorder the sample and repopulate the results when selected sort type changes
+		function updateSort() {
+			if (loaded) {
+				var d = d3.select('#sort').node().value;
+				currentResults.sort(function(a,b) {
+					return chart.results[a][d] - chart.results[b][d];
+				});
+				populateResults();
+			}
+		}
+
+		//Empty and then refill the results area with resultViews for
+		//the current page of results
+		function populateResults() {
+			var pageSize = d3.select('#pageSize').node().value;
+			pageResults = currentResults.slice((currentPage-1)*pageSize,
+										Math.min(currentPage*pageSize,currentResults.length));
+			d3.select('#resultsArea').html('').selectAll('.resultView')
+				.data(pageResults)
+				.enter()
+					.append('div').attr('class', 'resultView')
+					.style('width',d3.select('#imageSize').node().value+'px')
+					.each(function(d) {
+						createResultViewContents(this, d);
+					})
+		}
+
+		//Create a display for the results of the given data point
+		//in the given parent
+		function createResultViewContents(parent, d) {
+			d3.select(parent)
+				//set highlight in the chart when mousing over
+				.on('mouseenter', function(d) {
+					chart.setHighlight(d);
+					updateInfoPane(d, d3.event);
+				})
+				.on('mouseleave', function(d) {
+					chart.setHighlight(null);
+					updateInfoPane(null, d3.event);
+				})
+				//add the image
+				.append('div')
+					.attr('class', 'resultImg')
+					.append('img')
+						.attr('src',currentDb.directory+'/'+(d+1)+'.png')
+						.attr('width', '100%')
+					//Display a modal with the full-size image when clicked
+					.on('click', function() {
+						d3.select('body').append('div')
+							.attr('class', 'modalBackground')
+							.on('click', function() {
+								d3.select(this).remove();
+							})
+							.append('img')
+								.attr('class', 'modalImg')
+								.attr('src',d3.select(this).attr('src'));
+					});
+		}
+
+		//Update the top margin of the result area according to the size of
+		//the header and svgArea
+		function updateResultMargins() {
+			var topRect = d3.select('#top').node().getBoundingClientRect();
+			d3.select('#resultsArea').style('margin-top',topRect.height+'px');
+		}
+
+		//Update the info pane according to the index of the data
+		//being moused over
+		function updateInfoPane(index, event) {
+			var pane = d3.select('.infoPane');
+			if (index != null && pane.empty()) {
+				pane = d3.select('body').append('div')
+					.attr('class', 'infoPane')
+			}
+			if (index != null) {
+				pane.html(function() {
+						var text = '';
+						var data = chart.results[index]
+						for (i in data) {
+							text += ('<b>'+i+':</b> ');
+							text += (data[i] + '<br>');
+						}
+						return text;
+					});
+				//Draw the info pane in the side of the window opposite the mouse
+				var leftHalf = (event.clientX <= window.innerWidth/2)
+				if (leftHalf)
+					pane.style('right', '30px');
+				else
+					pane.style('left', '30px');
+			}
+			else {
+				d3.select('.infoPane').remove();
+			}
+		}
+
+		//Recalculate the number of pages needed and rebuild the pageNav widget
+		function updatePageNav() {
+			currentPage = 1;
+			d3.select('.pageNav').remove();
+			var pageSize = d3.select('#pageSize').node().value;
+			if (currentResults.length > pageSize) {
+				//create an array of page numbers to bind to pageNav widget
+				var num = Math.floor(currentResults.length / pageSize);
+				if (currentResults.length % pageSize > 0) {num++};
+				var pageNums = [];
+				for (var i = 0; i < num; i++){pageNums[i] = i+1};
+				d3.select('body').append('ul').attr('class', 'pageNav')
+					.selectAll('li')
+					.data(pageNums)
+					.enter()
+						.append('li').attr('class','pageButton')
+						.attr('mode', function(d) {d == 1 ? 'selected' : 'default'})
+						.text(function(d) {return d})
+						.on('click', function(d) {
+							if (d3.select(this).attr('mode') != 'selected') {
+								currentPage = d;
+								d3.select('.pageButton[mode="selected"]').attr('mode','default');
+								d3.select(this).attr('mode', 'selected');
+								populateResults();
+							}
+						});
+
+			}
+		}
+	</script>
+</body>
