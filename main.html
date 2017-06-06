@@ -9,7 +9,7 @@ Version 1.0-->
 	<meta name='author' content="Cameron Tauxe">
 	<link rel='stylesheet' href='css/parallelCoordinates.css'>
 	<link rel='stylesheet' href='css/viewer.css'>
-	<script src="lib/d3.v3.min.js"></script>
+	<script src="lib/d3.min.js"></script>
 	<script src = 'lib/ParallelCoordinatesChart.js'></script>
 </head>
 <body>
@@ -25,6 +25,7 @@ Version 1.0-->
 		</div>
 		<div id="svgArea">
 			<div id="svgContainer"></div>
+			<div id="selectionStats"></div>
 		</div>
 		<div id="controlsArea">
 			<div id="pageSizeControls" class="controlPanel">
@@ -88,8 +89,8 @@ Version 1.0-->
 		updateImageSize();
 
 		//Set up dragging on the resize bar
-		var resizeDrag = d3.behavior.drag()
-			.on('dragstart', function() {
+		var resizeDrag = d3.drag()
+			.on('start', function() {
 				d3.select(this).attr('mode', 'dragging');
 			})
 			.on('drag', function() {
@@ -99,7 +100,7 @@ Version 1.0-->
 				updateResultMargins();
 				chart.updateSize();
 			})
-			.on('dragend', function() {
+			.on('end', function() {
 				d3.select(this).attr('mode', 'default');
 			});
 		d3.select('#resizeBar').call(resizeDrag);
@@ -126,14 +127,14 @@ Version 1.0-->
 			d3.select('#svgContainer').html('');
 			chart = new ParallelCoordinatesChart(d3.select('#svgContainer'),
 												currentDb.directory+'/'+currentDb.csv,
-												doneLoading,
-												onSelectionChange,
-												updateInfoPane);
+												[],//dimensions filter is empty
+												doneLoading);
 		}
 
 		/**
 		 * Called when a database finishes loading.
 		 * Fills the sort selection with the new database's dimensions,
+		 * and sets dispatch events
 		 */
 		function doneLoading() {
 			loaded = true;
@@ -143,6 +144,9 @@ Version 1.0-->
 				.enter().append('option')
 					.attr('value',function(d){return d;})
 					.text(function(d){return d;})
+			
+			chart.dispatch.on("selectionchange",onSelectionChange);
+			chart.dispatch.on("mouseover",updateInfoPane);
 		}
 
 		/**
@@ -150,6 +154,9 @@ Version 1.0-->
 		 * Updates currentResults, sorts, and repopulates the results area
 		 */
 		function onSelectionChange(query) {
+			d3.select('#selectionStats')
+				.text(query.length+' out of '+chart.results.length+' results selected');
+
 			currentResults = query.slice();//clone query
 			var d = d3.select('#sort').node().value;
 			currentResults.sort(function(a,b) {
