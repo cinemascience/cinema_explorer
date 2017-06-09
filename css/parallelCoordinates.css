@@ -2,7 +2,7 @@
 	font: 10px sans-serif;
 }
 
-.pCoordChart .resultPaths path{
+.pCoordChart path{
 	fill: none;
 	stroke-width: 2px;
 	stroke: palegreen;
@@ -10,14 +10,21 @@
 
 	vector-effect: non-scaling-stroke;
 }
-.pCoordChart .resultPaths path[mode="inactive"] {
+.pCoordChart path[mode="inactive"] {
 	display: none;
 }
 
-.pCoordChart .resultPaths .highlightPath {
+.pCoordChart .highlightPath { 
 	pointer-events: none;
 	stroke-width: 4px;
 	stroke: lightskyblue;
+	stroke-opacity: 1;
+}
+
+.pCoordChart .overlayPath {
+	pointer-events: none;
+	stroke-dasharray: 20, 10;
+	stroke: crimson;
 	stroke-opacity: 1;
 }
 

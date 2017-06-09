@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!--A general Parallel Coordinates-based viewer for Spec-D cineme databases
-Version 1.1-->
+<!--A general Parallel Coordinates-based viewer for Spec-D cinema databases
+Version 1.2-->
 <html lang='en'>
 <head>
 	<title>Cinema Database Explorer</title>
@@ -16,6 +16,7 @@ Version 1.1-->
 	<div id="top">
 		<div id="header">
 			<h1>Cinema Database Explorer</h1>
+			<!--Controls to select and load databases-->
 			<div id="databaseControls">
 				<span id="databaseLabel">Select Database:</span>
 				<br>
@@ -24,9 +25,24 @@ Version 1.1-->
 			</div>
 		</div>
 		<div id="svgArea">
+			<!--Slide-out control panel for defining a custom path and querying for results similiar to it-->
+			<div id="customControlPanel">
+				<div id="customPanelContents" style="display:none;">
+					<button id="findSimiliar" onclick="findSimiliar()">Find Similiar</button>
+					<span>Threshold:</span>
+					<input id="threshold" type="number" min="0" step="0.05" value="1.0" oninput="updateThreshold()"></input>
+				</div>
+				<!--Button to show/hide the panel-->
+				<div id="showHideButton" onclick="toggleShowHide()">
+					<span id="showHideLabel">></span>
+				</div>
+			</div>
+			<!--Contains the svg for the chart-->
 			<div id="svgContainer"></div>
+			<!--x/y results selected readout-->
 			<div id="selectionStats"></div>
 		</div>
+		<!--Control panel for viewing results-->
 		<div id="controlsArea">
 			<div id="pageSizeControls" class="controlPanel">
 				<span id="pageSizeLabel">Results Per Page:</span>
@@ -49,6 +65,7 @@ Version 1.1-->
 				<input id="imageSize" type="range" min="100" max="500" default="350" oninput="updateImageSize()">
 			</div>
 		</div>
+		<!--Bar to click-and-drag to resize the chart-->
 		<div id="resizeBar"></div>
 	</div>
 	<div id="resultsArea"></div>
@@ -62,6 +79,12 @@ Version 1.1-->
 		var loaded = false;
 
 		var currentPage = 1;
+
+		//Vars concerning the user-defined path
+		var showingCustomControls = false;
+		var customPath = {};
+		var upperBoundPath = {};
+		var lowerBoundPath = {};
 
 		//Load databases.json and register databases into the database selection
 		//then load the first one
@@ -127,13 +150,14 @@ Version 1.1-->
 			d3.select('#svgContainer').html('');
 			chart = new ParallelCoordinatesChart(d3.select('#svgContainer'),
 												currentDb.directory+'/'+currentDb.csv,
-												[],//dimensions filter is empty
+												currentDb.filter,
 												doneLoading);
 		}
 
 		/**
 		 * Called when a database finishes loading.
 		 * Fills the sort selection with the new database's dimensions,
+		 * recreates custom path panel
 		 * and sets dispatch events
 		 */
 		function doneLoading() {
@@ -144,9 +168,61 @@ Version 1.1-->
 				.enter().append('option')
 					.attr('value',function(d){return d;})
 					.text(function(d){return d;})
+
+			chart.overlayPathData[0] = customPath = {data: {}, style: "stroke-dasharray:20,10;"};
+			chart.overlayPathData[1] = lowerBoundPath = {data: {}, style: "stroke-width:1px;stroke:pink;"};
+			chart.overlayPathData[2] = upperBoundPath = {data: {}, style: "stroke-width:1px;stroke:pink;"};
+			buildCustomControlPanel();
 			
 			chart.dispatch.on("selectionchange",onSelectionChange);
 			chart.dispatch.on("mouseover",updateInfoPane);
+		}
+
+		/**
+		 * Toggle showing and hiding the custom path panel.
+		 */
+		function toggleShowHide() {
+			showingCustomControls = !showingCustomControls;
+			if (showingCustomControls) {//Show panel
+				d3.select('#customControlPanel')
+					.transition()
+						.duration(500)
+						.style('width','500px');
+				d3.select('#svgArea')
+					.transition()
+						.duration(500)
+						.style('padding-left','500px')
+						.on('end',function(){chart.updateSize();})
+						.on('start', function(){
+							d3.select('#customPanelContents').style('display','initial');
+							customPath.style = "opacity:1;stroke-dasharray:20,10;"
+							upperBoundPath.style = "stroke-width:1px;opacity:1;stroke:pink;";
+							lowerBoundPath.style = "stroke-width:1px;opacity:1;stroke:pink;";
+							chart.updateOverlayPaths();
+						});
+				d3.select('#showHideLabel').text('<');
+			}
+			else {//Hide panel
+				d3.select('#customControlPanel')
+					.transition()
+						.duration(500)
+						.style('width','25px');
+				d3.select('#svgArea')
+					.transition()
+						.duration(500)
+						.style('padding-left','25px')
+						.on('end',function(){
+							chart.updateSize();
+							d3.select('#customPanelContents').style('display','none');
+						})
+						.on('start',function() {
+							customPath.style = "opacity:0;stroke-dasharray:20,10;";
+							upperBoundPath.style = "stroke-width:1px;opacity:0;stroke:pink;";
+							lowerBoundPath.style = "stroke-width:1px;opacity:0;stroke:pink;";
+							chart.updateOverlayPaths();
+						});
+				d3.select('#showHideLabel').text('>');
+			}
 		}
 
 		/**
@@ -225,7 +301,7 @@ Version 1.1-->
 				.append('div')
 					.attr('class', 'resultImg')
 					.append('img')
-						.attr('src',currentDb.directory+'/'+(d+1)+'.png')
+						.attr('src',currentDb.directory+'/'+(d+1)+'.'+currentDb.filetype)
 						.attr('width', '100%')
 					//Display a modal with the full-size image when clicked
 					.on('click', function() {
@@ -245,6 +321,102 @@ Version 1.1-->
 		function updateResultMargins() {
 			var topRect = d3.select('#top').node().getBoundingClientRect();
 			d3.select('#resultsArea').style('margin-top',topRect.height+'px');
+		}
+
+		/**
+		 * Create the custom path panel
+		 */
+		function buildCustomControlPanel() {
+			//Set maximum of threshold according to the number of dimensions
+			var input = d3.select('#threshold');
+			input.attr('max',d3.keys(chart.dimensions.filter(function(d) {
+					return !isNaN(chart.results[0][d]);
+				})).length);
+			//Clamp threshold to max
+			if (Number(input.node().value)>Number(input.attr('max')))
+				input.node().value = input.attr('max');
+			//Create a customControlRow for each dimension
+			d3.select('#customPanelContents').selectAll('div.customControlRow').remove();
+			var rows = d3.select('#customPanelContents').selectAll('div.customControlRow')
+				.data(chart.dimensions.filter(function(d) {
+					return !isNaN(chart.results[0][d]);
+				}))
+				.enter().append('div')
+					.attr('class','customControlRow');
+			//label
+			rows.append('span')
+				.text(function(d){return d;});
+			//checkbox
+			rows.append('input')
+				.attr('type','checkbox')
+				.on('input', function(d) {
+					if (this.checked) {
+						var slider = d3.select(this.parentNode)
+									.select('input[type="range"]').node();
+						slider.dispatchEvent(new Event('input'));
+					}
+					else {
+						delete customPath.data[d];
+						delete upperBoundPath.data[d];
+						delete lowerBoundPath.data[d];
+						updateThreshold();
+						chart.updateOverlayPaths(true);
+					}
+				});
+			//slider
+			rows.append('input')
+				.attr('type','range')
+				.attr('min',function(d){return chart.y[d].domain()[0];})
+				.attr('max',function(d){return chart.y[d].domain()[chart.y[d].domain().length-1];})
+				.on('input', function(d) {
+					var checkbox = d3.select(this.parentNode)
+									.select('input[type="checkbox"]').node();
+					if (!checkbox.checked)
+						checkbox.checked = true;
+					var avgThreshold = Number(d3.select('#threshold').node().value)/d3.keys(customPath.data).length;
+					var domain = chart.y[d].domain();
+					customPath.data[d] = this.value;
+					updateThreshold();
+					chart.updateOverlayPaths(true);
+				});
+		}
+
+		/**
+		 * Called when the find similiar button is pressed.
+		 * Query for results similiar to the user-defined path
+		 * and set the selection to those similiar results
+		 */
+		function findSimiliar() {
+			if (customPath.data != {}) {
+				var threshold = Number(d3.select('#threshold').node().value);
+				var similiar = chart.getSimiliar(customPath.data,
+								threshold);
+				if (similiar.length > 0)
+					chart.setSelection(similiar);
+				else
+					alert("No similiar results found!");
+			}
+		}
+
+		/**
+		 * Redraw the upper and lower bound paths according to changes
+		 * in the user-defined path or the threshold
+		 */
+		function updateThreshold() {
+			var dims = chart.dimensions.filter(function(d) {
+					return !isNaN(chart.results[0][d]);
+			});
+			var avgThreshold = Number(d3.select('#threshold').node().value)/d3.keys(customPath.data).length;
+			dims.forEach(function(d) {
+				var domain = chart.y[d].domain();
+				var value = Number(customPath.data[d]);
+				if (value) {
+					var diff = Number(Math.abs(domain[0]-domain[domain.length-1])*avgThreshold);
+					upperBoundPath.data[d] = Math.min(value+diff,domain[domain.length-1]);
+					lowerBoundPath.data[d] = Math.max(value-diff,domain[0]);
+					chart.updateOverlayPaths(true);
+				}
+			});
 		}
 
 		//Update the info pane according to the index of the data
