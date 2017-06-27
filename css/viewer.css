@@ -167,6 +167,23 @@ body {
 	padding-bottom: 130px; /*leaves room for pageNav widget*/
 }
 
+#type1Warning {
+	padding: 10px;
+	width: 35%;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	background: #999;
+	border: solid #333 5px;
+	border-radius: 10px;
+	box-shadow: 2px 2px 5px dimgray;
+
+	color: black;
+	font-weight: bold;
+	font-size: 24px;
+
+}
+
 .resultView {
 	display: inline-block;
 	margin: 5px;
@@ -178,6 +195,13 @@ body {
 	border: 4px solid skyblue;
 	box-shadow: 2px 2px 8px black;
 	/*transform: translateY(-8px);*/
+}
+
+.resultErrorText {
+	text-align: center;
+	padding: 10px;
+	font-size: 24px;
+	font-weight: bold;
 }
 
 .resultImg {

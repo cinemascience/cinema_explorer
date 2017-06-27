@@ -1,9 +1,7 @@
 [
 	{
 		"name" : "Placeholder Database",
-		"directory" : "myDirectory",
-		"csv" : "myCSV.csv",
-		"filetype" : "png",
+		"directory" : "myDatabase.cbd/",
 		"filter": []
 	}
 ]

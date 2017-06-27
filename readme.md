@@ -1,5 +1,5 @@
 #Cinema Spec-D Parallel Coordinates Viewer
-##Version 1.2
+##Version 1.3
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
@@ -7,6 +7,8 @@ Currently does not contain any data. **WILL NOT RUN** unless you add some data.
 Use the outline in **databases.json**
 
 #Changelog
+##V1.3
+- Up to Spec with Cinema Spec-D V1.0. (Can read both Type I and Type II)
 ##V1.2
 - Updated to use version 1.3.1 of Parallel Coordinates Component
 - Added feature to allow user to define a custom result, and query for results similiar to it.
