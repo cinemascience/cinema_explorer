@@ -337,16 +337,22 @@ function buildCustomControlPanel() {
 	//slider
 	rows.append('input')
 		.attr('type','range')
-		.attr('min',function(d){return chart.y[d].domain()[0];})
-		.attr('max',function(d){return chart.y[d].domain()[chart.y[d].domain().length-1];})
+		.attr('min',0)
+		.attr('max',100)
+		.attr('step',1)
+		.attr('value',50)
+		.each(function(d) {
+			this.scaleToDomain = d3.scaleLinear()
+				.domain([0,100])
+				.range(chart.y[d].domain());
+		})
 		.on('input', function(d) {
 			var checkbox = d3.select(this.parentNode)
 							.select('input[type="checkbox"]').node();
 			if (!checkbox.checked)
 				checkbox.checked = true;
 			var avgThreshold = Number(d3.select('#threshold').node().value)/d3.keys(customPath.data).length;
-			var domain = chart.y[d].domain();
-			customPath.data[d] = this.value;
+			customPath.data[d] = this.scaleToDomain(this.value);
 			updateThreshold();
 			chart.updateOverlayPaths(true);
 		});
