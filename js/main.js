@@ -81,6 +81,7 @@ function load() {
 										currentDb.directory+'data.csv',
 										["FILE"].concat(currentDb.filter),
 										doneLoading);
+	chart.smoothPaths = d3.select('#smoothLines').node().checked;
 }
 
 /**
@@ -172,6 +173,24 @@ function toggleShowHide() {
 					chart.updateOverlayPaths();
 				});
 		d3.select('#showHideLabel').text('>');
+	}
+}
+
+function updateSmoothLines() {
+	var smooth = d3.select('#smoothLines').node().checked;
+	if (loaded) {
+		chart.smoothPaths = smooth;
+		chart.paths.transition(1000).attr("d", function(d){return chart.getPath(d)});
+
+		chart.highlightPath.transition(1000).attr('d',function() {
+			var index = d3.select(this).attr('index');
+			var path = d3.select('.resultPaths .resultPath[index="'+index+'"]');
+			return path.attr('d');
+		});
+
+		chart.overlayPaths.selectAll('path').transition(1000)
+			.attr('style', function(d) {return d.style})
+			.attr('d', function(d) {return chart.getIncompletePath(d.data)});
 	}
 }
 

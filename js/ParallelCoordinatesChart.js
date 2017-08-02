@@ -2,7 +2,7 @@
  * Based on Parallel Coordinates example by Mike Bostock and Jason Davies
  * 
  * Modified by Cameron Tauxe
- * Version: 1.3.1 (June 9, 2016)
+ * Version: 1.3.2 (August 2, 2017)
  */
 
 /**
@@ -37,6 +37,7 @@ function ParallelCoordinatesChart(parent, pathToCSV, filter, callback) {
 	this.paths;
 	this.highlightPath;
 	this.overlayPaths;
+	this.smoothPaths = true;
 	//data for overlay paths
 	//overlayPathData is an array of objects (one for each path) formatted like so:
 	// {data: (data_to_draw_path_from), style: (style_attribute)}
@@ -188,7 +189,7 @@ function ParallelCoordinatesChart(parent, pathToCSV, filter, callback) {
  */
 ParallelCoordinatesChart.prototype.getPath = function(d) {
 	var self = this;
-	var curveLength = this.internalWidth/this.dimensions.length/3;
+	var curveLength = this.smoothPaths ? this.internalWidth/this.dimensions.length/3 : 0;
 	var path = '';
 	this.dimensions.filter(function(p) {
 		//do not include undefined values in determining path
@@ -222,7 +223,7 @@ ParallelCoordinatesChart.prototype.getPath = function(d) {
  */
 ParallelCoordinatesChart.prototype.getIncompletePath = function(d) {
 	var self = this;
-	var curveLength = this.internalWidth/this.dimensions.length/3;
+	var curveLength = this.smoothPaths ? this.internalWidth/this.dimensions.length/3 : 0;
 	var path = '';
 
 	//Split dimensions into sections deliminated by missing dimensions
