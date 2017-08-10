@@ -78,7 +78,7 @@ function load() {
 	currentDb = databases[d3.select('#database').node().value];
 	d3.select('#svgContainer').html('');
 	chart = new ParallelCoordinatesChart(d3.select('#svgContainer'),
-										currentDb.directory+'data.csv',
+										currentDb.directory+'/'+'data.csv',
 										["FILE"].concat(currentDb.filter),
 										doneLoading);
 }
@@ -265,7 +265,7 @@ function createResultViewContents(parent, d) {
 		d3.select(parent).append('div')
 			.attr('class', 'resultImg')
 			.append('img')
-				.attr('src',currentDb.directory+chart.results[d].FILE)
+				.attr('src',currentDb.directory+'/'+chart.results[d].FILE)
 				.attr('width', '100%')
 			//Display a modal with the full-size image when clicked
 			.on('click', function() {
