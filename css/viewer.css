@@ -121,6 +121,13 @@ body {
 	height: 100%;
 }
 
+#smoothLinesWrapper {
+	position: absolute;
+	top: 3px;
+	right: 10px;
+	font-size: 12px;
+}
+
 #selectionStats {
 	position: absolute;
 	bottom: 0px;

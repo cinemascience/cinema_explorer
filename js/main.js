@@ -81,6 +81,7 @@ function load() {
 										currentDb.directory+'/'+'data.csv',
 										["FILE"].concat(currentDb.filter),
 										doneLoading);
+	chart.smoothPaths = d3.select('#smoothLines').node().checked;
 }
 
 /**
@@ -172,6 +173,24 @@ function toggleShowHide() {
 					chart.updateOverlayPaths();
 				});
 		d3.select('#showHideLabel').text('>');
+	}
+}
+
+function updateSmoothLines() {
+	var smooth = d3.select('#smoothLines').node().checked;
+	if (loaded) {
+		chart.smoothPaths = smooth;
+		chart.paths.transition(1000).attr("d", function(d){return chart.getPath(d)});
+
+		chart.highlightPath.transition(1000).attr('d',function() {
+			var index = d3.select(this).attr('index');
+			var path = d3.select('.resultPaths .resultPath[index="'+index+'"]');
+			return path.attr('d');
+		});
+
+		chart.overlayPaths.selectAll('path').transition(1000)
+			.attr('style', function(d) {return d.style})
+			.attr('d', function(d) {return chart.getIncompletePath(d.data)});
 	}
 }
 
@@ -337,16 +356,22 @@ function buildCustomControlPanel() {
 	//slider
 	rows.append('input')
 		.attr('type','range')
-		.attr('min',function(d){return chart.y[d].domain()[0];})
-		.attr('max',function(d){return chart.y[d].domain()[chart.y[d].domain().length-1];})
+		.attr('min',0)
+		.attr('max',100)
+		.attr('step',1)
+		.attr('value',50)
+		.each(function(d) {
+			this.scaleToDomain = d3.scaleLinear()
+				.domain([0,100])
+				.range(chart.y[d].domain());
+		})
 		.on('input', function(d) {
 			var checkbox = d3.select(this.parentNode)
 							.select('input[type="checkbox"]').node();
 			if (!checkbox.checked)
 				checkbox.checked = true;
 			var avgThreshold = Number(d3.select('#threshold').node().value)/d3.keys(customPath.data).length;
-			var domain = chart.y[d].domain();
-			customPath.data[d] = this.value;
+			customPath.data[d] = this.scaleToDomain(this.value);
 			updateThreshold();
 			chart.updateOverlayPaths(true);
 		});
