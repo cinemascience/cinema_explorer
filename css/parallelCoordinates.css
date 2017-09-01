@@ -1,11 +1,12 @@
 .pCoordChart {
 	font: 10px sans-serif;
+    background-color: whitesmoke;
 }
 
 .pCoordChart path{
 	fill: none;
 	stroke-width: 2px;
-	stroke: palegreen;
+	stroke: lightgray;
 	stroke-opacity: 0.3;
 
 	vector-effect: non-scaling-stroke;
@@ -37,12 +38,11 @@
 .pCoordChart .axis line,
 .pCoordChart .axis path {
 	fill: none;
-	stroke: #000;
+	stroke: black; 
 	shape-rendering: crispEdges;
 }
 
 .pCoordChart .axis text {
 	fill: black;
-	text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
 	cursor: move;
 }
