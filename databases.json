@@ -1,17 +1,7 @@
 [
 	{
-		"name" : "GF-HP",
-		"directory" : "data/GF-HP.cdb",
-		"filter": []
-	},
-	{
 		"name" : "sphere",
 		"directory" : "data/sphere.cdb",
-		"filter": []
-	},
-	{
-		"name" : "matlab",
-		"directory" : "data/matlab.cdb",
 		"filter": []
 	}
 ]
