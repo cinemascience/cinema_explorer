@@ -5,7 +5,6 @@ var type1;//Whether or not the databases is SpecD Type 1
 var chart;//The Parallel Coordinates Chart
 var currentResults = [];//The Array of selected results from the chart
 var loaded = false;
-var validFiletypes = ['jpg','jpeg','png','gif'];
 
 var currentPage = 1;
 
@@ -68,6 +67,27 @@ window.onresize = function(){
 //END MAIN THREAD
 //FUNCTION DEFINITIONS BELOW
 //*********
+
+function isValidFiletype(type) {
+    var validFiletypes = ['jpg','jpeg','png','gif'];
+    
+    type = type.trimLeft();
+    type = type.trimRight();
+    index = validFiletypes.indexOf(type.toLowerCase()); 
+
+    if (index < 0) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function getFileExtension(path) {
+    ext = path.substr(path.lastIndexOf('.')+1);
+    ext = ext.trimRight();
+
+    return ext;
+}
 
 /**
  * Set the current database to the one selected in the database selection
@@ -275,10 +295,9 @@ function createResultViewContents(parent, d) {
 		});
 	//Create contents
 	var file = chart.results[d].FILE;
-	var filetype = file.substr(file.lastIndexOf('.')+1);
-	var validType = validFiletypes.find(function(type) {
-		return filetype.toUpperCase() == type.toUpperCase();
-	})
+	var filetype = getFileExtension(file);
+	var validType = isValidFiletype(filetype); 
+
 	//Add the image if the file is of an accepted image filetype
 	if (validType) {
 		d3.select(parent).append('div')
