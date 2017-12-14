@@ -74,7 +74,24 @@ Chang, and is licensed appropriately.
 	shape-rendering: crispEdges;
 }
 
+.pCoordChart .axis path.NaNExtension,
+.pCoordChart .axis .NaNExtensionTick line {
+	stroke: rgb(196, 23, 57);
+}
+.pCoordChart .axis .NaNExtensionTick text{
+	fill: rgb(196, 23, 57);
+}
+
 .pCoordChart .axis text {
 	fill: black;
 	cursor: move;
+}
+
+.pCoordChart .errorMessage {
+	position: absolute;
+	top: 5px;
+	left: 5px;
+
+	fill: rgb(196, 23, 57);
+	font-size: 14px;
 }

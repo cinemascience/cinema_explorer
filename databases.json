@@ -1,7 +1,6 @@
 [
 	{
 		"name" : "sphere",
-		"directory" : "data/sphere.cdb",
-		"filter": []
+		"directory" : "data/sphere.cdb"
 	}
 ]

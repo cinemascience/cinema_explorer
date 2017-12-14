@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.3.1
+pcoord_viewer Version 1.4
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Init variables
 var databases;//An array of the databases (loaded from databases.json)
 var currentDb;//The currently loaded database
-var type1;//Whether or not the databases is SpecD Type 1
+var imageDimension;//The dimension used for image files (if there is one)
 var chart;//The Parallel Coordinates Chart
 var currentResults = [];//The Array of selected results from the chart
 var loaded = false;
@@ -102,24 +102,17 @@ window.onresize = function(){
 //*********
 
 function isValidFiletype(type) {
-    var validFiletypes = ['jpg','jpeg','png','gif'];
-    
-    type = type.trimLeft();
-    type = type.trimRight();
-    index = validFiletypes.indexOf(type.toLowerCase()); 
+	if (!type)
+		return false;
+	var validFiletypes = ['JPG','JPEG','PNG','GIF'];
+	type = type.trimLeft().trimRight();
+	index = validFiletypes.indexOf(type.toUpperCase()); 
 
-    if (index < 0) {
-        return false;
-    } else {
-        return true;
-    }
+	return (index >= 0);
 }
 
 function getFileExtension(path) {
-    ext = path.substr(path.lastIndexOf('.')+1);
-    ext = ext.trimRight();
-
-    return ext;
+	return path ? path.substr(path.lastIndexOf('.')+1).trimRight() : undefined;
 }
 
 /**
@@ -132,7 +125,7 @@ function load() {
 	d3.select('#svgContainer').html('');
 	chart = new ParallelCoordinatesChart(d3.select('#svgContainer'),
 										currentDb.directory+'/'+'data.csv',
-										["FILE"].concat(currentDb.filter),
+										currentDb.filter === undefined ? /^FILE/ : new RegExp(currentDb.filter),
 										doneLoading);
 	chart.smoothPaths = d3.select('#smoothLines').node().checked;
 }
@@ -146,12 +139,23 @@ function load() {
 function doneLoading() {
 	loaded = true;
 
-	type1 = !(chart.results[0].FILE);
-	if (type1) {
+	imageDimension = undefined;
+	//Get image dimension. (First FILE dimension with a valid filetype)
+	for (var i in chart.allDimensions) {
+		var d = chart.allDimensions[i];
+		if ((/^FILE/).test(d)) {
+			if (isValidFiletype(getFileExtension(chart.results[0][d]))) {
+				imageDimension = d;
+				break;
+			}
+		}
+	}
+
+	if (!imageDimension) {
 		d3.select('#controlsArea')
 			.style('display','none');
 		d3.selectAll('#resultsArea .resultView').remove();
-		d3.select('#type1Warning')
+		d3.select('#noImageWarning')
 			.style('display','block');
 		d3.select('.pageNav').remove();
 		chart.dispatch.on("selectionchange", function(query) {
@@ -162,7 +166,7 @@ function doneLoading() {
 	else {
 		d3.select('#controlsArea')
 			.style('display','block');
-		d3.select('#type1Warning')
+		d3.select('#noImageWarning')
 		.style('display','none');
 		d3.select('#sort').html('').selectAll('option')
 		.data(chart.dimensions)
@@ -243,7 +247,7 @@ function updateSmoothLines() {
 
 		chart.overlayPaths.selectAll('path').transition(1000)
 			.attr('style', function(d) {return d.style})
-			.attr('d', function(d) {return chart.getIncompletePath(d.data)});
+			.attr('d', function(d) {return chart.getPath(d.data)});
 	}
 }
 
@@ -296,7 +300,6 @@ function populateResults() {
 	var pageSize = d3.select('#pageSize').node().value;
 	pageResults = currentResults.slice((currentPage-1)*pageSize,
 								Math.min(currentPage*pageSize,currentResults.length));
-	//d3.selectAll('#resultsArea .resultView').remove();
 	var views = d3.select('#resultsArea').selectAll('.resultView')
 		.data(pageResults)
 			.html('')
@@ -327,16 +330,15 @@ function createResultViewContents(parent, d) {
 			updateInfoPane(null, d3.event);
 		});
 	//Create contents
-	var file = chart.results[d].FILE;
-	var filetype = getFileExtension(file);
-	var validType = isValidFiletype(filetype); 
+	var file = chart.results[d][imageDimension];
+	var validType = isValidFiletype(getFileExtension(file));
 
 	//Add the image if the file is of an accepted image filetype
 	if (validType) {
 		d3.select(parent).append('div')
 			.attr('class', 'resultImg')
 			.append('img')
-				.attr('src',currentDb.directory+'/'+chart.results[d].FILE)
+				.attr('src',currentDb.directory+'/'+file)
 				.attr('width', '100%')
 			//Display a modal with the full-size image when clicked
 			.on('click', function() {
@@ -372,7 +374,7 @@ function buildCustomControlPanel() {
 	//Set maximum of threshold according to the number of dimensions
 	var input = d3.select('#threshold');
 	input.attr('max',d3.keys(chart.dimensions.filter(function(d) {
-			return !isNaN(chart.results[0][d]);
+			return !chart.isStringDimension(d);
 		})).length);
 	//Clamp threshold to max
 	if (Number(input.node().value)>Number(input.attr('max')))
@@ -381,7 +383,7 @@ function buildCustomControlPanel() {
 	d3.select('#customPanelContents').selectAll('div.customControlRow').remove();
 	var rows = d3.select('#customPanelContents').selectAll('div.customControlRow')
 		.data(chart.dimensions.filter(function(d) {
-			return !isNaN(chart.results[0][d]);
+			return !chart.isStringDimension(d);
 		}))
 		.enter().append('div')
 			.attr('class','customControlRow');
@@ -422,7 +424,6 @@ function buildCustomControlPanel() {
 							.select('input[type="checkbox"]').node();
 			if (!checkbox.checked)
 				checkbox.checked = true;
-			var avgThreshold = Number(d3.select('#threshold').node().value)/d3.keys(customPath.data).length;
 			customPath.data[d] = this.scaleToDomain(this.value);
 			updateThreshold();
 			chart.updateOverlayPaths(true);
