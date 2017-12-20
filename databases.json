@@ -2,21 +2,5 @@
 	{
 		"name" : "sphere",
 		"directory" : "data/sphere.cdb"
-	},
-	{
-		"name" : "Bogus 1",
-		"directory" : "data/bogus/bogus_1.cdb"
-	},
-	{
-		"name" : "Bogus 2",
-		"directory" : "data/bogus/bogus_2.cdb"
-	},
-	{
-		"name" : "Bogus 3",
-		"directory" : "data/bogus/bogus_3.cdb"
-	},
-	{
-		"name" : "Bogus 4",
-		"directory" : "data/bogus/bogus_4.cdb"
 	}
 ]
