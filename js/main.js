@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.4
+pcoord_viewer Version 1.4.1
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Init variables
 var databases;//An array of the databases (loaded from databases.json)
 var currentDb;//The currently loaded database
-var imageDimension;//The dimension used for image files (if there is one)
+var fileDimensions; //The FILE dimensions (if any)
 var chart;//The Parallel Coordinates Chart
 var currentResults = [];//The Array of selected results from the chart
 var loaded = false;
@@ -139,23 +139,20 @@ function load() {
 function doneLoading() {
 	loaded = true;
 
-	imageDimension = undefined;
+	fileDimensions = [];
 	//Get image dimension. (First FILE dimension with a valid filetype)
 	for (var i in chart.allDimensions) {
 		var d = chart.allDimensions[i];
 		if ((/^FILE/).test(d)) {
-			if (isValidFiletype(getFileExtension(chart.results[0][d]))) {
-				imageDimension = d;
-				break;
-			}
+			fileDimensions.push(d);
 		}
 	}
 
-	if (!imageDimension) {
+	if (fileDimensions.length == 0) {
 		d3.select('#controlsArea')
 			.style('display','none');
 		d3.selectAll('#resultsArea .resultView').remove();
-		d3.select('#noImageWarning')
+		d3.select('#noFileWarning')
 			.style('display','block');
 		d3.select('.pageNav').remove();
 		chart.dispatch.on("selectionchange", function(query) {
@@ -166,7 +163,7 @@ function doneLoading() {
 	else {
 		d3.select('#controlsArea')
 			.style('display','block');
-		d3.select('#noImageWarning')
+		d3.select('#noFileWarning')
 		.style('display','none');
 		d3.select('#sort').html('').selectAll('option')
 		.data(chart.dimensions)
@@ -271,7 +268,7 @@ function onSelectionChange(query) {
 //Update the image size when the slider for it is moved
 function updateImageSize() {
 	var width = d3.select('#imageSize').node().value;
-	d3.selectAll('.resultView').style('width',width+'px');
+	d3.selectAll('.fileDisplay .display').style('width',width+'px');
 	d3.select('#imageSizeLabel').text('Image Size: ' + width + 'px');
 }
 
@@ -288,7 +285,8 @@ function updateSort() {
 	if (loaded) {
 		var d = d3.select('#sort').node().value;
 		currentResults.sort(function(a,b) {
-			return chart.results[a][d] - chart.results[b][d];
+			return chart.getYPosition(d,chart.results[b]) -
+					chart.getYPosition(d,chart.results[a]);
 		});
 		populateResults();
 	}
@@ -301,27 +299,20 @@ function populateResults() {
 	pageResults = currentResults.slice((currentPage-1)*pageSize,
 								Math.min(currentPage*pageSize,currentResults.length));
 	var views = d3.select('#resultsArea').selectAll('.resultView')
-		.data(pageResults)
-			.html('')
-			.each(function(d) {
-				createResultViewContents(this, d);
-			});
-	views.enter()
-		.append('div').attr('class', 'resultView')
-		.style('width',d3.select('#imageSize').node().value+'px')
-		.each(function(d) {
-			createResultViewContents(this, d);
-		});
-	views.exit()
-		.remove();
+		.data(pageResults);
+	views.exit().remove(); //remove unused resultViews
+	views.enter() //add new resultViews
+		.append('div').attr('class','resultView')
+	.merge(views) //update
+		.call(createResultViews);
 }
 
-//Create a display for the results of the given data point index
-//in the given parent
-function createResultViewContents(parent, d) {
-	//set highlight in the chart when mousing over
-	d3.select(parent)
-		.on('mouseenter', function(d) {
+//Called on a selection of resultViews to create their contents
+//Assumes data has already been bound to selection
+function createResultViews(selection) {
+	//Set highlight on chart when mousing over
+	selection
+		.on('mouseenter',function(d) {
 			chart.setHighlight(d);
 			updateInfoPane(d, d3.event);
 		})
@@ -329,35 +320,70 @@ function createResultViewContents(parent, d) {
 			chart.setHighlight(null);
 			updateInfoPane(null, d3.event);
 		});
-	//Create contents
-	var file = chart.results[d][imageDimension];
-	var validType = isValidFiletype(getFileExtension(file));
+	
+	//Bind list of files to each resultView
+	//Create fileDisplays for each file
+	selection.each(function(d) {
+		var files = fileDimensions.map(function(dimension) {
+			return chart.results[d][dimension];
+		});
+		var displays = d3.select(this).selectAll('.fileDisplay')
+			.data(files);
+		displays.exit().remove();
+		displays.enter()
+			.append('div').attr('class','fileDisplay')
+		.merge(displays).html('')
+			.call(createFileDisplays);
+	});
+}
 
-	//Add the image if the file is of an accepted image filetype
-	if (validType) {
-		d3.select(parent).append('div')
-			.attr('class', 'resultImg')
-			.append('img')
-				.attr('src',currentDb.directory+'/'+file)
-				.attr('width', '100%')
-			//Display a modal with the full-size image when clicked
-			.on('click', function() {
-				d3.select('body').append('div')
-					.attr('class', 'modalBackground')
-					.on('click', function() {
-						d3.select(this).remove();
-					})
+//Called on a selection of fileDisplays to create their contents
+//Assumes data has already been bound to selection
+//Assumes incoming fileDisplays are empty
+function createFileDisplays(selection) {
+	selection.append('div')
+		.attr('class','display')
+		.style('width',d3.select('#imageSize').node().value+'px')
+		.each(function(d) {
+			//Create an image in the file display if the it is an image filetype
+			if (isValidFiletype(getFileExtension(d))) {
+				d3.select(this)
+					.attr('content','image')
 					.append('img')
-						.attr('class', 'modalImg')
-						.attr('src',d3.select(this).attr('src'));
-			});
-	}
-	//Otherwise add a warning that the file could not be displayed
-	else {
-		d3.select(parent).append('div')
-			.attr('class','resultErrorText')
-			.text('Cannot display file: ' + file);
-	}
+						.attr('class','resultImg')
+						.attr('src',currentDb.directory+'/'+d)
+						.attr('width', '100%')
+						.on('click',createModalImg)
+			}
+			//Otherwise create an error message
+			else {
+				d3.select(this)
+					.attr('content','text')
+					.append('div')
+						.attr('class','resultErrorText')
+						.text('Cannot display file: ' + d);
+			}
+		});
+
+	//Create label at the bottom of display
+	if (selection.selectAll('.displayLabel').empty())
+		selection.append('div')
+			.attr('class','displayLabel')
+			.text(function(d,i) {return fileDimensions[i];});
+}
+
+//An event handler for an image to create modal
+//when the image is clicked.
+function createModalImg() {
+	d3.select('body').append('div')
+		.attr('class', 'modalBackground')
+		.on('click', function() {
+			//clicking the modal removes it
+			d3.select(this).remove();
+		})
+		.append('img')
+			.attr('class', 'modalImg')
+			.attr('src',d3.select(this).attr('src'));
 }
 
 //Update the top margin of the result area according to the size of
@@ -478,7 +504,7 @@ function updateInfoPane(index, event) {
 	}
 	if (index != null) {
 		pane.html(function() {
-				var text = '';
+				var text = '<b>Index:<b> '+index+'<br>';
 				var data = chart.results[index]
 				for (i in data) {
 					text += ('<b>'+i+':</b> ');

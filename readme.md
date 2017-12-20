@@ -1,10 +1,14 @@
 # Cinema Spec-D Parallel Coordinates Viewer
 
-## Version 1.4
+## Version 1.4.1
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
 # Changelog
+## V1.4.1
+- Now displays all FILE fields for each result
+- Fixed sorting not working properly when undefined or NaN values or involved
+- Update to use v1.4.01 of Parallel Coordinates Component
 ## V1.4
 - Compatible with v1.1 of Cinema SpecD and v1.4 of Parallel Coordinates Component
 ## V1.3.1

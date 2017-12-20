@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.4
+pcoord_viewer Version 1.4.1
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -207,13 +207,13 @@ body {
 	padding-bottom: 130px; /*leaves room for pageNav widget*/
 }
 
-#noImageWarning {
+#noFileWarning {
 	padding: 10px;
 	width: 35%;
 	margin-left: auto;
 	margin-right: auto;
 	text-align: center;
-	background: #999;
+	background: rgb(201, 201, 201);
 	border: solid #333 5px;
 	border-radius: 10px;
 	box-shadow: 2px 2px 5px dimgray;
@@ -227,20 +227,45 @@ body {
 .resultView {
 	display: inline-block;
 	margin: 5px;
+	padding: 2px;
 	border: 4px solid black;
 	background-color: lightgray;
-	box-shadow: 1px 1px 3px black;
+	box-shadow: 1px 1px 2px black;
 }
 .resultView:hover {
-	border: 4px solid skyblue;
-	box-shadow: 2px 2px 8px black;
-	/*transform: translateY(-8px);*/
+	/*border: 4px solid skyblue;*/
+	box-shadow: 2px 4px 8px black;
+	/*transform: translateY(-8px)*/;
+}
+
+.fileDisplay {
+	display: inline-block;
+}
+
+.fileDisplay .display {
+	margin: 2px;
+}
+
+.fileDisplay .display[content="image"] {
+	border: 2px solid black;
+	line-height: 0;
+	cursor: pointer;
+}
+
+.fileDisplay .display[content="image"]:hover {
+	border: 2px solid rgb(23, 165, 221);
+	box-shadow: 1px 1px 2px black;
+}
+
+.fileDisplay .displayLabel {
+	font-size: 12px;
+	text-align: center;
 }
 
 .resultErrorText {
 	text-align: center;
-	padding: 10px;
-	font-size: 24px;
+	padding: 5px;
+	font-size: 14px;
 	font-weight: bold;
 }
 
