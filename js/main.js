@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.4.1
+pcoord_viewer Version 1.4.3
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -258,9 +258,10 @@ function onSelectionChange(query) {
 
 	currentResults = query.slice();//clone query
 	var d = d3.select('#sort').node().value;
-	currentResults.sort(function(a,b) {
-		return chart.results[a][d] - chart.results[b][d];
-	});
+	currentResults.sort(getSortComparator(d));
+	if (d3.select('#sortOrder').node().checked) {
+		currentResults.reverse();
+	}
 	updatePageNav();
 	populateResults();
 }
@@ -284,12 +285,28 @@ function updatePageSize() {
 function updateSort() {
 	if (loaded) {
 		var d = d3.select('#sort').node().value;
-		currentResults.sort(function(a,b) {
-			return chart.getYPosition(d,chart.results[b]) -
-					chart.getYPosition(d,chart.results[a]);
-		});
+		currentResults.sort(getSortComparator(d));
+		if (d3.select('#sortOrder').node().checked) {
+			currentResults.reverse();
+		}
 		populateResults();
 	}
+}
+
+//Flip the order of current results when sortOrder is toggled
+function updateSortOrder() {
+	if (loaded) {
+		currentResults.reverse();
+		populateResults();
+	}
+}
+
+//Get a comparator function for sorting results on the given dimension
+function getSortComparator(d) {
+	return function(a,b) {
+		return chart.getYPosition(d,chart.results[b]) -
+			chart.getYPosition(d,chart.results[a])
+	};
 }
 
 //Empty and then refill the results area with resultViews for
@@ -526,30 +543,81 @@ function updateInfoPane(index, event) {
 
 //Recalculate the number of pages needed and rebuild the pageNav widget
 function updatePageNav() {
-	currentPage = 1;
-	d3.select('.pageNav').remove();
+	d3.select('.pageNavWrapper').remove(); //remove previous widget
 	var pageSize = d3.select('#pageSize').node().value;
+	//If there are more results than can fit on one page, build a pageNav widget
 	if (currentResults.length > pageSize) {
-		//create an array of page numbers to bind to pageNav widget
-		var num = Math.floor(currentResults.length / pageSize);
-		if (currentResults.length % pageSize > 0) {num++};
-		var pageNums = [];
-		for (var i = 0; i < num; i++){pageNums[i] = i+1};
-		d3.select('body').append('ul').attr('class', 'pageNav')
+		//calculate number of pages needed
+		var numPages = Math.ceil(currentResults.length/pageSize);
+		//If the currently selected page is higher than the new number of pages, set to last page
+		if (currentPage > numPages) {currentPage = numPages};
+		//Add pageNav and buttons
+		d3.select('body').append('div').attr('class','pageNavWrapper')
+		.append('ul').attr('class','pageNav')
 			.selectAll('li')
-			.data(pageNums)
-			.enter()
-				.append('li').attr('class','pageButton')
-				.attr('mode', function(d) {d == 1 ? 'selected' : 'default'})
-				.text(function(d) {return d})
-				.on('click', function(d) {
-					if (d3.select(this).attr('mode') != 'selected') {
-						currentPage = d;
-						d3.select('.pageButton[mode="selected"]').attr('mode','default');
-						d3.select(this).attr('mode', 'selected');
+			.data(getPageButtons(numPages,currentPage))
+			.enter().append('li').attr('class','pageButton')
+			.attr('mode', function(d) {return d.page == currentPage ? 'selected': 'default';})
+			.text(function(d) {return d.text;})
+			.on('click',function(d) {
+				if (d3.select(this).attr('mode') != 'selected') {
+					currentPage = d.page;
+					if (d.do_rebuild) {
+						updatePageNav();
 						populateResults();
 					}
-				});
+					else {
+						d3.select('.pageButton[mode="selected"]').attr('mode','default');
+						d3.select(this).attr('mode','selected');
+						d3.select('.pageReadout').text(currentPage + " / " + numPages);
+						populateResults();
+					}
+				}
+			});
+		//Add readout of currentPage/totalPages
+		d3.select('.pageNavWrapper').append('div').attr('class','pageReadout')
+			.text(currentPage + " / " + numPages);
+	}
+	else {
+		currentPage = 1;
+	}
+}
 
+//Given the number of pages needed and the currently selected page, return
+// a list of objects represented the pageNav buttons to show
+// objects are formatted like so:
+// {text: [button_text],
+//	page: [pageNumber to link to], 
+//	do_rebuild: [whether or not the pageNav widget should be rebuilt when this button is clicked]}
+function getPageButtons(numPages, current) {
+	//If there are 7 or fewer pages, create a widget with a button for each page ([1|2|3|4|5|6|7])
+	if (numPages <= 7) {
+		var pageData = [];
+		for (var i = 0; i < numPages; i++)
+			pageData.push({text: i+1, page: i+1, do_rebuild: false});
+		return pageData;
+	}
+	//Otherwise, create a widget with buttons for navigating relative to selected page ([|<|<<|10|20|30|>>|>|])
+	else {
+		//step size is one order of magnitude below the total number of pages
+		var stepSize = Math.pow(10,Math.round(Math.log10(numPages)-1));
+		var pageData = [];
+		//Create buttons for selecting lower pages if current is not already one
+		if (current != 1) {
+			pageData.push({text: "|<", page: 1, do_rebuild: true});
+			pageData.push({text: "<", page: current-1, do_rebuild: true});
+			var prevStep = current-stepSize >= 1 ? current-stepSize : current-1;
+			pageData.push({text: prevStep, page: prevStep, do_rebuild: true});
+		}
+		//Create button for currently selected page
+		pageData.push({text: current, page: current, do_rebuild: false});
+		//Create buttons for selecting higher pages if current is not already at the end
+		if (current != numPages) {
+			var nextStep = current+stepSize <= numPages ? current+stepSize : current+1;
+			pageData.push({text: nextStep, page: nextStep, do_rebuild: true});
+			pageData.push({text: ">", page: current+1, do_rebuild: true});
+			pageData.push({text: ">|", page: numPages, do_rebuild: true});
+		}
+		return pageData;
 	}
 }

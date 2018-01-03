@@ -1,10 +1,14 @@
 # Cinema Spec-D Parallel Coordinates Viewer
 
-## Version 1.4.2
+## Version 1.4.3
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
 # Changelog
+## V1.4.3
+- Page selection widget changes to a more compact form when there are many pages of results
+- Added "Reverse Sort Order" option
+- Fixed results not being sorted correctly when changing the database being viewed
 ## V1.4.2
 - Update to use v1.4.02 of Parallel Coordinates Component
 ## V1.4.1

@@ -3,7 +3,7 @@
 <!--
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.4.2
+pcoord_viewer Version 1.4.3
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -93,6 +93,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 				<span id="sortLabel">Sort By:</span>
 				<br>
 				<select id="sort" onchange="updateSort()"></select>
+			</div>
+			<div id="sortOrderControls" class="controlPanel">
+				<span id="sortOrderLabel">Reverse Sort Order:</span>
+				<br>
+				<input type="checkbox" id="sortOrder" oninput="updateSortOrder()">
 			</div>
 			<div id="imageSizeControls" class="controlPanel">
 				<span id="imageSizeLabel">Image Size:</span>

@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.4.1
+pcoord_viewer Version 1.4.3
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -304,7 +304,7 @@ body {
 	border-radius: 5px;
 }
 
-.pageNav {
+.pageNavWrapper {
 	padding: initial;
 	z-index: 2;
 	position: fixed;
@@ -316,6 +316,11 @@ body {
 	border: 2px solid lightgray;
 	border-radius: 3px;
 	box-shadow: 3px 3px 10px dimgray;
+}
+
+.pageNav {
+	margin: initial;
+	padding: initial;
 }
 
 .pageButton {
@@ -333,6 +338,14 @@ body {
 .pageButton[mode='selected']:hover {
 	color: white;
 	background-color: rgba(100,100,100,0.85);
+}
+
+.pageReadout {
+	background-color: rgba(25,25,25,0.85);
+	color: white;
+	text-align: center;
+	font-size: 12px;
+	padding: 3px;
 }
 
 .pCoordChart .overlayPath {
