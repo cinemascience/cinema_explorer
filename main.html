@@ -3,7 +3,7 @@
 <!--
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.4.3
+pcoord_viewer Version 1.5
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -37,12 +37,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <head>
 	<title>Cinema:Explorer</title>
 	<meta charset="utf-8">
-	<meta name='author' content="James Ahrens">
 	<meta name='author' content="Cameron Tauxe">
-	<link rel='stylesheet' href='lib/pcoord-1.4.02/parallelCoordinates.css'>
+	<meta name='author' content="James Ahrens">
+	<link rel='stylesheet' href='lib/cinema-components-2.1/PcoordSVG.css'>
+	<link rel='stylesheet' href='lib/cinema-components-2.1/ImageSpread.css'>
+	<link rel='stylesheet' href='lib/cinema-components-2.1/Query.css'>
 	<link rel='stylesheet' href='css/viewer.css'>
 	<script src = 'lib/d3.min.js'></script>
-	<script src = 'lib/pcoord-1.4.02/ParallelCoordinatesChart.js'></script>
+	<script src = 'lib/cinema-components-2.1/CinemaComponents.min.js'></script>
 </head>
 <body>
 	<div id="top">
@@ -56,63 +58,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 				<button id="loadButton" onclick="load()">Load</button>
 			</div>
 		</div>
-		<div id="svgArea">
-			<!--Slide-out control panel for defining a custom path and querying for results similiar to it-->
-			<div id="customControlPanel">
-				<div id="customPanelContents" style="display:none;">
-					<button id="findSimiliar" onclick="findSimiliar()">Find Similiar</button>
-					<span>Threshold:</span>
-					<input id="threshold" type="number" min="0" step="0.05" value="1.0" oninput="updateThreshold()"></input>
+		<div id="pcoordArea">
+			<!--Slide-out control panel for defining a custom path and querying for results similar to it-->
+			<div id="slideOut">
+				<div id="slideOutContents" style="display:none;">
+					<div id="queryContainer"></div>
 				</div>
 				<!--Button to show/hide the panel-->
 				<div id="showHideButton" onclick="toggleShowHide()">
 					<span id="showHideLabel">></span>
 				</div>
 			</div>
-			<!--Contains the svg for the chart-->
-			<div id="svgContainer"></div>
-			<!--x/y results selected readout-->
+			<!--Contains the pcoord component-->
+			<div id="pcoordContainer"></div>
+			<!--readout for the number of results currently selected-->
 			<div id="selectionStats"></div>
+			<!--Checkbox for toggling smooth lines on the chart-->
 			<div id="smoothLinesWrapper">
 				<input id="smoothLines" type="checkbox" checked="checked" oninput="updateSmoothLines()">Smooth Lines</input>
-			</div>
-		</div>
-		<!--Control panel for viewing results-->
-		<div id="controlsArea">
-			<div id="pageSizeControls" class="controlPanel">
-				<span id="pageSizeLabel">Results Per Page:</span>
-				<br>
-				<select id="pageSize" onchange="updatePageSize()">
-					<option value="10">10</option>
-					<option value="25" selected="true">25</option>
-					<option value="50">50</option>
-					<option value="100">100</option>
-				</select>
-			</div>
-			<div id="sortControls" class="controlPanel">
-				<span id="sortLabel">Sort By:</span>
-				<br>
-				<select id="sort" onchange="updateSort()"></select>
-			</div>
-			<div id="sortOrderControls" class="controlPanel">
-				<span id="sortOrderLabel">Reverse Sort Order:</span>
-				<br>
-				<input type="checkbox" id="sortOrder" oninput="updateSortOrder()">
-			</div>
-			<div id="imageSizeControls" class="controlPanel">
-				<span id="imageSizeLabel">Image Size:</span>
-				<br>
-				<input id="imageSize" type="range" min="100" max="500" default="350" oninput="updateImageSize()">
 			</div>
 		</div>
 		<!--Bar to click-and-drag to resize the chart-->
 		<div id="resizeBar"></div>
 	</div>
-	<div id="resultsArea">
-		<!--This text appears in place of results when viewing a database with no files
-		It's display property is set programtically-->
-		<div id="noFileWarning">No additional information to display</div>
-	</div>
+	<!--The lower half of the page contains a component for viewing the selected data-->
+	<div id="viewContainer"></div>
 
 	<!--Main Script-->
 	<script src="js/main.js"></script>
