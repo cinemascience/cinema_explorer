@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.5
+pcoord_viewer Version 1.6
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -57,7 +57,8 @@ body {
 	margin: initial;
 }
 
-#databaseControls {
+#databaseControls,
+#axisOrderPanel {
 	display: inline-block;
 	margin-left: 40px;
 }

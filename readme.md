@@ -1,10 +1,13 @@
 # Cinema Spec-D Parallel Coordinates Viewer
 
-## Version 1.5
+## Version 1.6
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
 # Changelog
+## V1.6
+- Now using v2.2 of Cinema Components library
+- Added support for axis_order.csv files in databases
 ## V1.5
 - Significant refactoring. Now used v2.0 of Cinema Components library
 - ImageSpread and Query Panel have be re-implemented as components in library

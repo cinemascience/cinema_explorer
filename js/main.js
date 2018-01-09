@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.5
+pcoord_viewer Version 1.6
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 var databaseInfo;//An array of the databases as defined in databases.json
 var currentDbInfo //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database
+var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
 
 var loaded = false;
 
@@ -107,12 +108,18 @@ window.onresize = function(){
  * and load it, replacing the chart with a new one
  */
 function load() {
-	var loaded = false;
+	loaded = false;
 
 	//Remove old components
 	if (window.chart) {chart.destroy();}
 	if (window.view) {view.destroy();}
 	if (window.query) {query.destroy();}
+
+	//Remove axisOrdering panel if it exists
+	if (hasAxisOrdering) {
+		d3.select('#axisOrderPanel').remove();
+	}
+	hasAxisOrdering = false;
 
 	currentDbInfo = databaseInfo[d3.select('#database').node().value];
 	currentDb = new CINEMA_COMPONENTS.Database(currentDbInfo.directory,doneLoading,loadingError);
@@ -190,6 +197,11 @@ function doneLoading() {
 
 	//Trigger initial selectionchange event
 	pcoord.dispatch.call('selectionchange',pcoord,pcoord.selection);
+
+	if (currentDb.hasAxisOrdering) {
+		hasAxisOrdering = true;
+		buildAxisOrderPanel();
+	}
 }
 
 /**
@@ -228,6 +240,61 @@ function toggleShowHide() {
 		d3.select('#showHideLabel').text('>');
 	}
 
+}
+
+/**
+ * Build a panel for selecting axis orderings
+ * Add listeners for pcoord chart
+ */
+function buildAxisOrderPanel() {
+	//Add panel
+	var axisOrderPanel = d3.select('#header').append('div')
+		.attr('id','axisOrderPanel');
+	//Add label
+	axisOrderPanel.append('span')
+		.attr('id','axisOrderLabel')
+		.text("Axis Order:");
+	axisOrderPanel.append('br');
+	//Add select for category
+	axisOrderPanel.append('select')
+		.attr('id','axis_category')
+		.selectAll('option').data(d3.keys(currentDb.axisOrderData))
+			.enter().append('option')
+				.attr('value',function(d){return d;})
+				.text(function(d){return d;});
+	//Set onchange for category select to populate value select
+	d3.select('#axis_category').on('change',function() {
+		var category = currentDb.axisOrderData[this.value];
+		var val = d3.select('#axis_value').selectAll('option')
+			.data(d3.range(-1,category.length));//-1 is 'custom' order
+		val.exit().remove();
+		val.enter().append('option')
+			.merge(val)
+				.attr('value',function(d){return d;})
+				.text(function(d){return d == -1 ? 'Custom' : category[d].name;});
+		//set onchange for value select to change order in pcoord chart
+		d3.select('#axis_value').on('change',function() {
+			if (this.value != -1) {
+				var order = category[this.value].order;
+				pcoord.setAxisOrder(order);
+			}
+		});
+		d3.select('#axis_value').node().value = -1; //set to custom
+	});
+	//Add spacer
+	axisOrderPanel.append('span').text(' : ');
+	//Add value select
+	axisOrderPanel.append('select')
+		.attr('id','axis_value');
+
+	//Add handler to pcoord chart to set value select to "custom" 
+	//when axis order is manually changed
+	pcoord.dispatch.on('axisorderchange',function() {
+		d3.select('#axis_value').node().value = -1;
+	});
+
+	//trigger change in category to populate value select
+	d3.select('#axis_category').on('change').call(d3.select('#axis_category').node());
 }
 
 /**
