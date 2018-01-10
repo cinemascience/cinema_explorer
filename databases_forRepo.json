@@ -1,0 +1,10 @@
+[
+	{
+		"name" : "sphere",
+		"directory" : "data/sphere.cdb"
+	},
+	{
+		"name" : "Sphere Multi-Image",
+		"directory" : "data/sphere_multi-image.cdb"
+	}
+]

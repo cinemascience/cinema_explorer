@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.6
+pcoord_viewer Version 1.7
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -43,6 +43,13 @@ var loaded = false;
 var pcoord;//The Parallel Coordinates Chart
 var view; //The component for viewing selected results
 var query; //The component for querying results
+
+//View type enum
+var viewType = Object.freeze({
+	IMAGESPREAD: 0,
+	SCATTERPLOT: 1
+});
+var currentView = viewType.IMAGESPREAD;
 
 //State of the slideOut Panel
 var slideOutOpen = false;
@@ -141,15 +148,17 @@ function doneLoading() {
 	loaded = true;
 
 	pcoord = new CINEMA_COMPONENTS.PcoordSVG(d3.select('#pcoordContainer').node(),
-											currentDb,
-											currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+		currentDb,
+		currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	pcoord.smoothPaths = d3.select('#smoothLines').node().checked;
 
-	view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),
-												currentDb);
+	if (currentView == viewType.IMAGESPREAD)
+		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+	else if (currentView == viewType.SCATTERPLOT)
+		view = new CINEMA_COMPONENTS.ScatterPlotSVG(d3.select('#viewContainer').node(),currentDb,
+			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 
-	query = new CINEMA_COMPONENTS.Query(d3.select('#queryContainer').node(),
-												currentDb);
+	query = new CINEMA_COMPONENTS.Query(d3.select('#queryContainer').node(),currentDb);
 
 	//When selection in pcoord chart changes, set readout
 	//and update view component
@@ -158,17 +167,6 @@ function doneLoading() {
 			.text(selection.length+' out of '+currentDb.data.length+' results selected');
 		view.setSelection(selection);
 	});
-
-	//Respond to mouseover event.
-	//Set highlight in pcoord chart
-	//and update info pane
-	function handleMouseover(index, event) {
-		if (index != null)
-			pcoord.setHighlightedPaths([index]);
-		else
-			pcoord.setHighlightedPaths([]);
-		updateInfoPane(index,event);
-	}
 
 	//Set mouseover handler for pcoord and views component
 	pcoord.dispatch.on("mouseover",handleMouseover);
@@ -215,6 +213,7 @@ function toggleShowHide() {
 			.style('width','500px')
 			.on('start',function(){
 				d3.select('#slideOutContents').style('display','initial');
+				pcoord.setOverlayPaths([query.custom,query.upper,query.lower]);
 			})
 			.on('end',function() {
 				query.updateSize();
@@ -229,6 +228,9 @@ function toggleShowHide() {
 		d3.select('#slideOut').transition()
 			.duration(500)
 			.style('width','25px')
+			.on('start',function(){
+				pcoord.setOverlayPaths([]);
+			})
 			.on('end',function(){
 				d3.select('#slideOutContents').style('display','hidden');
 				query.updateSize();
@@ -240,6 +242,31 @@ function toggleShowHide() {
 		d3.select('#showHideLabel').text('>');
 	}
 
+}
+
+/**
+ * Change the view component to the specified viewType
+ */
+function changeView(type) {
+	if (loaded && type != currentView) {
+		currentView = type;
+		view.destroy();
+		if (currentView == viewType.IMAGESPREAD) {
+			view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+			d3.select('#imageSpreadTab').attr('selected','selected');
+			d3.select('#scatterPlotTab').attr('selected','default');
+		}
+		else if (currentView == viewType.SCATTERPLOT) {
+			view = new CINEMA_COMPONENTS.ScatterPlotSVG(d3.select('#viewContainer').node(),currentDb,
+				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+			d3.select('#scatterPlotTab').attr('selected','selected');
+			d3.select('#imageSpreadTab').attr('selected','default');
+		}
+		view.dispatch.on('mouseover',handleMouseover);
+		updateViewContainerSize();
+		view.updateSize();
+		view.setSelection(pcoord.selection);
+	}
 }
 
 /**
@@ -313,7 +340,25 @@ function updateSmoothLines() {
  **/
 function updateViewContainerSize() {
 	var topRect = d3.select('#top').node().getBoundingClientRect();
-	d3.select('#viewContainer').style('height',window.innerHeight-topRect.height+'px');
+	var tabRect = d3.select('#tabContainer').node().getBoundingClientRect();
+	d3.select('#viewContainer').style('height',window.innerHeight-topRect.height-tabRect.height+'px');
+}
+
+//Respond to mouseover event.
+//Set highlight in pcoord chart
+//and update info pane
+function handleMouseover(index, event) {
+	if (index != null) {
+		pcoord.setHighlightedPaths([index]);
+		if (currentView == viewType.SCATTERPLOT)
+			view.setHighlightedPoints([index]);
+	}
+	else {
+		pcoord.setHighlightedPaths([]);
+		if (currentView == viewType.SCATTERPLOT)
+			view.setHighlightedPoints([]);
+	}
+	updateInfoPane(index,event);
 }
 
 //Update the info pane according to the index of the data

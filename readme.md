@@ -1,10 +1,13 @@
 # Cinema Spec-D Parallel Coordinates Viewer
 
-## Version 1.6
+## Version 1.7
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
 # Changelog
+## V1.7
+- Now using v2.3 of Cinema Components library
+- Added Scatter Plot viewing mode
 ## V1.6
 - Now using v2.2 of Cinema Components library
 - Added support for axis_order.csv files in databases

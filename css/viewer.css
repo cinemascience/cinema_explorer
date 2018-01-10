@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.6
+pcoord_viewer Version 1.7
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -152,6 +152,45 @@ body {
 	background-color: rgb(105, 168, 207);
 }
 
+#tabContainer {
+	position: relative;
+	height: 45px;
+}
+
+.tab {
+	position: absolute;
+	box-sizing: border-box;
+	width: 50%;
+	height: 35px;
+	top: 10px;
+	padding: 5px;
+
+	text-align: center;
+	border-radius: 15px 15px 0px 0px;
+}
+.tab:first-child {
+	left: 0px;
+}
+.tab:last-child {
+	right: 0px;
+}
+.tab[selected="selected"] {
+	background: #e2e2e2;
+	border: 2px solid #9c9c9c;
+	border-bottom-width: 0px;
+}
+.tab[selected="default"] {
+	background: #6b6b6b;
+	border: 2px solid #505050;
+	border-bottom-width: 0px;
+	color: rgb(36, 36, 36);
+}
+.tab[selected="default"]:hover {
+	cursor: pointer;
+	background: #8b8b8b;
+	color: rgb(36, 36, 36);
+}
+
 .infoPane {
 	position: fixed;
 	bottom: 30px;
@@ -164,4 +203,8 @@ body {
 	font-family: initial;
 	border: 3px solid white;
 	border-radius: 5px;
+}
+
+.CINEMA_COMPONENT.SCATTER_PLOT {
+	background: #e2e2e2;
 }

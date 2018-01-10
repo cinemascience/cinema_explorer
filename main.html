@@ -3,7 +3,7 @@
 <!--
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.6
+pcoord_viewer Version 1.7
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -39,12 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<meta charset="utf-8">
 	<meta name='author' content="Cameron Tauxe">
 	<meta name='author' content="James Ahrens">
-	<link rel='stylesheet' href='lib/cinema-components-2.2/PcoordSVG.css'>
-	<link rel='stylesheet' href='lib/cinema-components-2.2/ImageSpread.css'>
-	<link rel='stylesheet' href='lib/cinema-components-2.2/Query.css'>
+	<link rel='stylesheet' href='lib/cinema-components-2.3/PcoordSVG.css'>
+	<link rel='stylesheet' href='lib/cinema-components-2.3/ImageSpread.css'>
+	<link rel='stylesheet' href='lib/cinema-components-2.3/Query.css'>
+	<link rel='stylesheet' href='lib/cinema-components-2.3/ScatterPlotSVG.css'>
 	<link rel='stylesheet' href='css/viewer.css'>
 	<script src = 'lib/d3.min.js'></script>
-	<script src = 'lib/cinema-components-2.2/CinemaComponents.min.js'></script>
+	<script src = 'lib/cinema-components-2.3/CinemaComponents.min.js'></script>
 </head>
 <body>
 	<div id="top">
@@ -82,6 +83,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		<div id="resizeBar"></div>
 	</div>
 	<!--The lower half of the page contains a component for viewing the selected data-->
+	<!--"Tabs" to select which component to use as the view-->
+	<div id="tabContainer">
+		<div class="tab" id="imageSpreadTab" selected="selected" onclick="changeView(viewType.IMAGESPREAD)">Image Spread</div>
+		<div class="tab" id="scatterPlotTab" selected="default" onclick="changeView(viewType.SCATTERPLOT)">Scatter Plot</div>
+	</div>
+	<!--The container for whichever component is selected-->
 	<div id="viewContainer"></div>
 
 	<!--Main Script-->
