@@ -1,10 +1,13 @@
 # Cinema Spec-D Parallel Coordinates Viewer
 
-## Version 1.7
+## Version 1.8
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
 # Changelog
+##
+- Now using v2.4 of Cinema Components library
+- Scatter Plot will remember which two dimensions you were viewing when changing tabs
 ## V1.7
 - Now using v2.3 of Cinema Components library
 - Added Scatter Plot viewing mode

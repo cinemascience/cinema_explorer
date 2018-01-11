@@ -6,37 +6,5 @@
 	{
 		"name" : "Sphere Multi-Image",
 		"directory" : "data/sphere_multi-image.cdb"
-	},
-	{
-		"name" : "Bogus 1",
-		"directory" : "data/bogus/bogus_1.cdb"
-	},
-	{
-		"name" : "Bogus 2",
-		"directory" : "data/bogus/bogus_2.cdb"
-	},
-	{
-		"name" : "Bogus 3",
-		"directory" : "data/bogus/bogus_3.cdb"
-	},
-	{
-		"name" : "Bogus 4",
-		"directory" : "data/bogus/bogus_4.cdb"
-	},
-	{
-		"name" : "Big Bogus 1",
-		"directory" : "data/bogus/big_bogus_1.cdb"
-	},
-	{
-		"name" : "Big Bogus 2",
-		"directory" : "data/bogus/big_bogus_2.cdb"
-	},
-	{
-		"name" : "Big Bogus 3",
-		"directory" : "data/bogus/big_bogus_3.cdb"
-	},
-	{
-		"name" : "Big Bogus 4",
-		"directory" : "data/bogus/big_bogus_4.cdb"
 	}
 ]

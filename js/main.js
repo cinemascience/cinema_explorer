@@ -1,7 +1,7 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.7
+pcoord_viewer Version 1.8
 
 Copyright 2017 Los Alamos National Laboratory 
 
@@ -50,6 +50,16 @@ var viewType = Object.freeze({
 	SCATTERPLOT: 1
 });
 var currentView = viewType.IMAGESPREAD;
+
+//save last-used dimensions on scatter plot between tab switches
+var savedDimensions = {};
+
+//Pcoord type enum
+var pcoordType = Object.freeze({
+	SVG: 0,
+	CANVAS: 1
+})
+var currentPcoord = pcoordType.SVG;
 
 //State of the slideOut Panel
 var slideOutOpen = false;
@@ -116,9 +126,10 @@ window.onresize = function(){
  */
 function load() {
 	loaded = false;
+	savedDimensions = {};
 
 	//Remove old components
-	if (window.chart) {chart.destroy();}
+	if (window.pcoord) {pcoord.destroy();}
 	if (window.view) {view.destroy();}
 	if (window.query) {query.destroy();}
 
@@ -147,16 +158,36 @@ function loadingError(error) {
 function doneLoading() {
 	loaded = true;
 
-	pcoord = new CINEMA_COMPONENTS.PcoordSVG(d3.select('#pcoordContainer').node(),
-		currentDb,
-		currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+	//Build pcoord
+	//Use a PcoordCanvas for larger datasets to prevent major slowdown
+	if (currentDb.data.length > 300) {
+		currentPcoord = pcoordType.CANVAS;
+		window.alert("This database is very large. The viewer will switch to a faster "+
+			"version of components. Some functionality may be unavailable.");
+		pcoord = new CINEMA_COMPONENTS.PcoordCanvas(d3.select('#pcoordContainer').node(),
+			currentDb,
+			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+	}
+	else {
+		currentPcoord = pcoordType.SVG;
+		pcoord = new CINEMA_COMPONENTS.PcoordSVG(d3.select('#pcoordContainer').node(),
+			currentDb,
+			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+	}
 	pcoord.smoothPaths = d3.select('#smoothLines').node().checked;
 
+	//Build view depending on selected viewType
 	if (currentView == viewType.IMAGESPREAD)
 		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
-	else if (currentView == viewType.SCATTERPLOT)
-		view = new CINEMA_COMPONENTS.ScatterPlotSVG(d3.select('#viewContainer').node(),currentDb,
-			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+	else if (currentView == viewType.SCATTERPLOT) {
+		//Use either an SVG or a Canvas Scatter Plot depending on pcoordType
+		if (currentPcoord == pcoordType.SVG)
+			view = new CINEMA_COMPONENTS.ScatterPlotSVG(d3.select('#viewContainer').node(),currentDb,
+				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+		else
+			view = new CINEMA_COMPONENTS.ScatterPlotCanvas(d3.select('#viewContainer').node(),currentDb,
+				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+	}
 
 	query = new CINEMA_COMPONENTS.Query(d3.select('#queryContainer').node(),currentDb);
 
@@ -172,10 +203,23 @@ function doneLoading() {
 	pcoord.dispatch.on("mouseover",handleMouseover);
 	view.dispatch.on('mouseover',handleMouseover);
 
+	//If the view is a Scatter Plot, set listeners to save dimensions when they are changed
+	if (currentView == viewType.SCATTERPLOT) {
+		view.dispatch.on('xchanged',function(d){savedDimensions.x = d;});
+		view.dispatch.on('ychanged',function(d){savedDimensions.y = d;});
+	}
+
 	//Set styles for query data
-	query.custom.style = "stroke-dasharray:20,7;stroke-width:3px;stroke:red";
-	query.lower.style = "stroke-dasharray:initial;stroke-width:2px;stroke:pink;";
-	query.upper.style = "stroke-dasharray:initial;stroke-width:2px;stroke:pink;";
+	if (currentPcoord == pcoordType.SVG) {
+		query.custom.style = "stroke-dasharray:20,7;stroke-width:3px;stroke:red";
+		query.lower.style = "stroke-dasharray:initial;stroke-width:2px;stroke:pink;";
+		query.upper.style = "stroke-dasharray:initial;stroke-width:2px;stroke:pink;";
+	}
+	else {
+		query.custom.style = {lineWidth:3,strokeStyle:'red',lineDash:[20,7]};
+		query.lower.style = {lineWidth:2,strokeStyle:'pink'};
+		query.upper.style = {lineWidth:2,strokeStyle:'pink'};
+	}
 	//Add query data as overlays to pcoord chart
 	pcoord.setOverlayPaths([query.custom,query.upper,query.lower]);
 
@@ -194,7 +238,7 @@ function doneLoading() {
 	view.updateSize();
 
 	//Trigger initial selectionchange event
-	pcoord.dispatch.call('selectionchange',pcoord,pcoord.selection);
+	pcoord.dispatch.call('selectionchange',pcoord,pcoord.selection.slice());
 
 	if (currentDb.hasAxisOrdering) {
 		hasAxisOrdering = true;
@@ -257,15 +301,35 @@ function changeView(type) {
 			d3.select('#scatterPlotTab').attr('selected','default');
 		}
 		else if (currentView == viewType.SCATTERPLOT) {
-			view = new CINEMA_COMPONENTS.ScatterPlotSVG(d3.select('#viewContainer').node(),currentDb,
-				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+			if (currentPcoord == pcoordType.SVG)
+				view = new CINEMA_COMPONENTS.ScatterPlotSVG(d3.select('#viewContainer').node(),currentDb,
+					currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+			else
+				view = new CINEMA_COMPONENTS.ScatterPlotCanvas(d3.select('#viewContainer').node(),currentDb,
+					currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 			d3.select('#scatterPlotTab').attr('selected','selected');
 			d3.select('#imageSpreadTab').attr('selected','default');
+
+			//add listeners to save dimensions when they are changed
+			view.dispatch.on('xchanged',function(d){savedDimensions.x = d;});
+			view.dispatch.on('ychanged',function(d){savedDimensions.y = d;});
+
+			//set view to currently saved dimensions
+			if (savedDimensions.x) {
+				var node = d3.select(view.xSelect).node();
+				node.value = savedDimensions.x;
+				d3.select(node).on('input').call(node);
+			}
+			if (savedDimensions.y) {
+				var node = d3.select(view.ySelect).node();
+				node.value = savedDimensions.y;
+				d3.select(node).on('input').call(node);
+			}
 		}
 		view.dispatch.on('mouseover',handleMouseover);
 		updateViewContainerSize();
 		view.updateSize();
-		view.setSelection(pcoord.selection);
+		view.setSelection(pcoord.selection.slice());
 	}
 }
 

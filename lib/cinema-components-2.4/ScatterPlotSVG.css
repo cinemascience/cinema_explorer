@@ -1,35 +1,36 @@
-.CINEMA_COMPONENT.SCATTER_PLOT .pointContainer {
+.CINEMA_COMPONENT.SCATTER_PLOT.SVG .pointContainer {
 	background: white;
 	border: 2px solid black;
 	border-width: 2px 2px 0px 0px;
 }
 
-.CINEMA_COMPONENT.SCATTER_PLOT .dimensionSelect.x {
+.CINEMA_COMPONENT.SCATTER_PLOT.SVG .dimensionSelect.x {
 	left: 50%;
 	transform: translateX(-50%);
 	bottom: 10px;
 }
 
-.CINEMA_COMPONENT.SCATTER_PLOT .dimensionSelect.y {
+.CINEMA_COMPONENT.SCATTER_PLOT.SVG .dimensionSelect.y {
 	top: 50%;
 	transform: translateY(-50%);
 	left: 10px;
+	max-width: 100px;
 }
 
-.CINEMA_COMPONENT.SCATTER_PLOT .axisContainer {
+.CINEMA_COMPONENT.SCATTER_PLOT.SVG .axisContainer {
 	pointer-events: none;
 	overflow: visible;
 }
 
-.CINEMA_COMPONENT.SCATTER_PLOT .axis line,
-.CINEMA_COMPONENT.SCATTER_PLOT .axis path {
+.CINEMA_COMPONENT.SCATTER_PLOT.SVG .axis line,
+.CINEMA_COMPONENT.SCATTER_PLOT.SVG .axis path {
 	fill: none;
 	stroke: black;
 	stroke-width: 2px;
 	shape-rendering: crispEdges;
 }
 
-.CINEMA_COMPONENT.SCATTER_PLOT .axis text {
+.CINEMA_COMPONENT.SCATTER_PLOT.SVG .axis text {
 	fill: black;
 }
 
