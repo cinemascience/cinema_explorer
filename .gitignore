@@ -1,6 +1,5 @@
 .DS_Store
 data/GF-HP.cdb/
-data/bogus/
 data/test.cdb
 databases_toIgnore.json
 getBuild.sh
