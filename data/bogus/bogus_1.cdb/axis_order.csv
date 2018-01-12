@@ -1,0 +1,4 @@
+category,value,String_0,Float_1,Integer_2,Integer_3,Float_4,Integer_5,Float_6,FILE_DATA_7,FILE_IMG_8,FILE_DATA_9,FILE_DATA_10,FILE_IMG_11
+Numbers,Integers First,7,4,1,2,5,3,6,,,,,
+Numbers,Floats First,7,1,4,5,2,6,3,8,9,10,11,12
+Strings,Strings First,1,,,,,,,2,3,4,5,6
