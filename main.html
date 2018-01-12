@@ -39,15 +39,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<meta charset="utf-8">
 	<meta name='author' content="Cameron Tauxe">
 	<meta name='author' content="James Ahrens">
-	<link rel='stylesheet' href='lib/cinema-components-2.4/PcoordSVG.css'>
-	<link rel='stylesheet' href='lib/cinema-components-2.4/PcoordCanvas.css'>
-	<link rel='stylesheet' href='lib/cinema-components-2.4/ImageSpread.css'>
-	<link rel='stylesheet' href='lib/cinema-components-2.4/Query.css'>
-	<link rel='stylesheet' href='lib/cinema-components-2.4/ScatterPlotSVG.css'>
-	<link rel='stylesheet' href='lib/cinema-components-2.4/ScatterPlotCanvas.css'>
+	<!--Import CinemaComponents Stylsheets-->
+	<link rel='stylesheet' href='lib/cinema-components/PcoordSVG.css'>
+	<link rel='stylesheet' href='lib/cinema-components/PcoordCanvas.css'>
+	<link rel='stylesheet' href='lib/cinema-components/ImageSpread.css'>
+	<link rel='stylesheet' href='lib/cinema-components/Query.css'>
+	<link rel='stylesheet' href='lib/cinema-components/ScatterPlotSVG.css'>
+	<link rel='stylesheet' href='lib/cinema-components/ScatterPlotCanvas.css'>
+	<!--Import Viewer's CSS-->
 	<link rel='stylesheet' href='css/viewer.css'>
+	<!--Import libraries-->
 	<script src = 'lib/d3.min.js'></script>
-	<script src = 'lib/cinema-components-2.4/CinemaComponents.min.js'></script>
+	<script src = 'lib/cinema-components/CinemaComponents.min.js'></script>
 </head>
 <body>
 	<div id="top">
@@ -83,7 +86,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		</div>
 		<!--Bar to click-and-drag to resize the chart-->
 		<div id="resizeBar"></div>
-	</div>
+	</div><!--end "top"-->
+
 	<!--The lower half of the page contains a component for viewing the selected data-->
 	<!--"Tabs" to select which component to use as the view-->
 	<div id="tabContainer">

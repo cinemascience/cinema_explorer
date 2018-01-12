@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Init variables
 var databaseInfo;//An array of the databases as defined in databases.json
 var currentDbInfo //Info for the currently selected database as defined in databases.json
-var currentDb;//The currently loaded database
+var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
 
 var loaded = false;
@@ -96,10 +96,11 @@ var resizeDrag = d3.drag()
 	.on('drag', function() {
 		var headerRect = d3.select('#header').node().getBoundingClientRect();
 		d3.select('#pcoordArea').style('height',(d3.event.y - headerRect.height)+'px');
-		//updateResultMargins();
 		updateViewContainerSize();
-		pcoord.updateSize();
-		view.updateSize();
+		if (loaded) {
+			pcoord.updateSize();
+			view.updateSize();
+		}
 	})
 	.on('end', function() {
 		d3.select(this).attr('mode', 'default');
@@ -108,9 +109,9 @@ d3.select('#resizeBar').call(resizeDrag);
 
 //Resize chart and update margins when window is resized
 window.onresize = function(){
+	updateViewContainerSize();
 	if (loaded) {
 		pcoord.updateSize();
-		updateViewContainerSize();
 		view.updateSize();
 	}
 };
@@ -122,7 +123,7 @@ window.onresize = function(){
 
 /**
  * Set the current database to the one selected in the database selection
- * and load it, replacing the chart with a new one
+ * and load it, rebuilding all components
  */
 function load() {
 	loaded = false;
@@ -140,6 +141,8 @@ function load() {
 	hasAxisOrdering = false;
 
 	currentDbInfo = databaseInfo[d3.select('#database').node().value];
+	//Init Database
+	//Will call doneLoading if succesful, otherwise wil call loadingError
 	currentDb = new CINEMA_COMPONENTS.Database(currentDbInfo.directory,doneLoading,loadingError);
 }
 
@@ -159,7 +162,7 @@ function doneLoading() {
 	loaded = true;
 
 	//Build pcoord
-	//Use a PcoordCanvas for larger datasets to prevent major slowdown
+	//Use a PcoordCanvas for larger datasets to prevent slowdown
 	if (currentDb.data.length > 300) {
 		currentPcoord = pcoordType.CANVAS;
 		window.alert("This database is very large. The viewer will switch to a faster "+
@@ -174,7 +177,10 @@ function doneLoading() {
 			currentDb,
 			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	}
+	//Set initial state of smoothPaths according to status of smoothLines checkbox
 	pcoord.smoothPaths = d3.select('#smoothLines').node().checked;
+	if (!pcoord.smoothPaths)
+		pcoord.redrawPaths();//redraw if smoothPaths should be false
 
 	//Build view depending on selected viewType
 	if (currentView == viewType.IMAGESPREAD)
@@ -189,6 +195,7 @@ function doneLoading() {
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	}
 
+	//Build Query panel
 	query = new CINEMA_COMPONENTS.Query(d3.select('#queryContainer').node(),currentDb);
 
 	//When selection in pcoord chart changes, set readout
@@ -210,6 +217,7 @@ function doneLoading() {
 	}
 
 	//Set styles for query data
+	//Style is interpreted differently by SVG and Canvas components
 	if (currentPcoord == pcoordType.SVG) {
 		query.custom.style = "stroke-dasharray:20,7;stroke-width:3px;stroke:red";
 		query.lower.style = "stroke-dasharray:initial;stroke-width:2px;stroke:pink;";
@@ -240,6 +248,7 @@ function doneLoading() {
 	//Trigger initial selectionchange event
 	pcoord.dispatch.call('selectionchange',pcoord,pcoord.selection.slice());
 
+	//Build the axis ordering panel if the database has additional axis order data
 	if (currentDb.hasAxisOrdering) {
 		hasAxisOrdering = true;
 		buildAxisOrderPanel();
@@ -290,23 +299,29 @@ function toggleShowHide() {
 
 /**
  * Change the view component to the specified viewType
+ * Called by clicking one of the tabs
  */
 function changeView(type) {
 	if (loaded && type != currentView) {
 		currentView = type;
-		view.destroy();
+		view.destroy();//destroy current view
+		//Build ImageSpread if Image Spread tab is selected
 		if (currentView == viewType.IMAGESPREAD) {
 			view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+			//change selected tab
 			d3.select('#imageSpreadTab').attr('selected','selected');
 			d3.select('#scatterPlotTab').attr('selected','default');
 		}
+		//Build ScatterPlot if Scatter Plot tab is selected
 		else if (currentView == viewType.SCATTERPLOT) {
+			//Build either SVG or Canvas ScatterPlot depending on pcoordType
 			if (currentPcoord == pcoordType.SVG)
 				view = new CINEMA_COMPONENTS.ScatterPlotSVG(d3.select('#viewContainer').node(),currentDb,
 					currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 			else
 				view = new CINEMA_COMPONENTS.ScatterPlotCanvas(d3.select('#viewContainer').node(),currentDb,
 					currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+			//change selected tab
 			d3.select('#scatterPlotTab').attr('selected','selected');
 			d3.select('#imageSpreadTab').attr('selected','default');
 
@@ -314,21 +329,25 @@ function changeView(type) {
 			view.dispatch.on('xchanged',function(d){savedDimensions.x = d;});
 			view.dispatch.on('ychanged',function(d){savedDimensions.y = d;});
 
-			//set view to currently saved dimensions
+			//set view to currently saved dimensions if defined
 			if (savedDimensions.x) {
 				var node = d3.select(view.xSelect).node();
 				node.value = savedDimensions.x;
-				d3.select(node).on('input').call(node);
+				d3.select(node).on('input').call(node);//trigger input event on select
 			}
 			if (savedDimensions.y) {
 				var node = d3.select(view.ySelect).node();
 				node.value = savedDimensions.y;
-				d3.select(node).on('input').call(node);
+				d3.select(node).on('input').call(node);//trigger input event on select
 			}
 		}
+
+		//Set mouseover handler for new view and update size
 		view.dispatch.on('mouseover',handleMouseover);
 		updateViewContainerSize();
 		view.updateSize();
+
+		//Set view's initial selection to the current pcoord selection
 		view.setSelection(pcoord.selection.slice());
 	}
 }
@@ -411,6 +430,7 @@ function updateViewContainerSize() {
 //Respond to mouseover event.
 //Set highlight in pcoord chart
 //and update info pane
+//Also sets highlight in view if its a Scatter Plot
 function handleMouseover(index, event) {
 	if (index != null) {
 		pcoord.setHighlightedPaths([index]);
