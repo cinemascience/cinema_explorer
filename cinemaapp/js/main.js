@@ -36,6 +36,7 @@ var databaseInfo;//An array of the databases as defined in databases.json
 var currentDbInfo //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
+var databaseFile = 'databases.json'
 
 var loaded = false;
 
@@ -64,10 +65,27 @@ var currentPcoord = pcoordType.SVG;
 //State of the slideOut Panel
 var slideOutOpen = false;
 
+// ---------------------------------------------------------------------------
+// Parse arguments that come in through the URL
+// ---------------------------------------------------------------------------
+var url = window.location.href;
+var urlArgs = url.split('?');
+var urlArgPairs = urlArgs[1].split('&');
+
+// go through all the pairs, and if you find something you expect, deal with it
+for (var i in urlArgPairs) {
+    var kvpair = urlArgPairs[i].split('=');
+
+    // now look for the values you expect, and do something with them
+    if (kvpair[0] == 'databases') {
+        databaseFile = kvpair[1]; 
+    }
+}
+
 //Load databases.json and register databases into the database selection
 //then load the first one
 var jsonRequest = new XMLHttpRequest();
-jsonRequest.open("GET",'databases.json',true);
+jsonRequest.open("GET",databaseFile,true);
 jsonRequest.onreadystatechange = function() {
 	if (jsonRequest.readyState === 4) {
 		if (jsonRequest.status === 200 || jsonRequest.status === 0) {
