@@ -36,7 +36,8 @@ The cinema databases can be anywhere below the directory that contains the
 
 - To add your data to the viewer, edit **cinemaapp/databases.json** to include references to your data.
     - You may override the default location and name of the **databases.json**
-      by passing arguments in the URL. For example:
+      by passing arguments in the URL. The file must be located at or below
+      the level of the **cinema.html** file. For example:
 ```
     file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
 ```
