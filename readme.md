@@ -9,7 +9,19 @@ A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
 # Usage
 
-## Adding Data
+## Installation
+To install Cinema:Explorer, copy the **cinema.html** and **cinemaapp/**
+directory to the same directory as your data. In a simple example, the installed
+files might look like this:
+
+```
+   cinema.html
+   cinemaapp/
+   database_01.cdb
+   database_02.cdb
+   database_03.cdb
+```
+
 - To add your data to the viewer, edit **databases.json** to include references to your data.
 - **databases.json** is a list of objects where each object must contain *at least* a 'name' field and 'directory' field. 'name' is the name of the databases that will be shown in the viewer. 'directory' is the path to the '.cdb' directory for your database.
 - Due to browser security features, most browsers will not read files if they are not in the same directory or in a subdirectory with **main.html**
