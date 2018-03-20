@@ -34,7 +34,14 @@ The cinema databases can be anywhere below the directory that contains the
        database_03.cdb
 ```
 
-- To add your data to the viewer, edit **databases.json** to include references to your data.
+- To add your data to the viewer, edit **cinemaapp/databases.json** to include references to your data.
+    - You may override the default location and name of the **databases.json**
+      by passing arguments in the URL. For example:
+```
+    file:
+    file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
+```
+
 - **databases.json** is a list of objects where each object must contain *at least* a 'name' field and 'directory' field. 'name' is the name of the databases that will be shown in the viewer. 'directory' is the path to the '.cdb' directory for your database.
 - Due to browser security features, most browsers will not read files if they are not in the same directory or in a subdirectory with **main.html**
 - Optionally, each object in **databases.json** may contain a 'filter' field. This field is a regular expression to filter out dimensions in the database from being displayed on the chart in the viewer. Any dimension whose name matches with the regex will be filtered out.
