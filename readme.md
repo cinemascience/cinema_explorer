@@ -22,6 +22,18 @@ files might look like this:
    database_03.cdb
 ```
 
+The cinema databases can be anywhere below the directory that contains the
+**cinema.html** and **cinemaapp/** directory. So, you could also have this:
+
+```
+   cinema.html
+   cinemaapp/
+   data/
+       database_01.cdb
+       database_02.cdb
+       database_03.cdb
+```
+
 - To add your data to the viewer, edit **databases.json** to include references to your data.
 - **databases.json** is a list of objects where each object must contain *at least* a 'name' field and 'directory' field. 'name' is the name of the databases that will be shown in the viewer. 'directory' is the path to the '.cdb' directory for your database.
 - Due to browser security features, most browsers will not read files if they are not in the same directory or in a subdirectory with **main.html**
