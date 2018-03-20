@@ -38,7 +38,6 @@ The cinema databases can be anywhere below the directory that contains the
     - You may override the default location and name of the **databases.json**
       by passing arguments in the URL. For example:
 ```
-    file:
     file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
 ```
 
