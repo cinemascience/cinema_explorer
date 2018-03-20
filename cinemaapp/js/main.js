@@ -36,7 +36,7 @@ var databaseInfo;//An array of the databases as defined in databases.json
 var currentDbInfo //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
-var databaseFile = 'databases.json'
+var databaseFile = 'cinemaapp/databases.json'
 
 var loaded = false;
 
@@ -70,15 +70,18 @@ var slideOutOpen = false;
 // ---------------------------------------------------------------------------
 var url = window.location.href;
 var urlArgs = url.split('?');
-var urlArgPairs = urlArgs[1].split('&');
 
-// go through all the pairs, and if you find something you expect, deal with it
-for (var i in urlArgPairs) {
-    var kvpair = urlArgPairs[i].split('=');
+if (urlArgs.length > 1) {
+    var urlArgPairs = urlArgs[1].split('&');
 
-    // now look for the values you expect, and do something with them
-    if (kvpair[0] == 'databases') {
-        databaseFile = kvpair[1]; 
+    // go through all the pairs, and if you find something you expect, deal with it
+    for (var i in urlArgPairs) {
+        var kvpair = urlArgPairs[i].split('=');
+
+        // now look for the values you expect, and do something with them
+        if (kvpair[0] == 'databases') {
+            databaseFile = kvpair[1]; 
+        }
     }
 }
 
