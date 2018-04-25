@@ -22,6 +22,18 @@ files might look like this:
    database_03.cdb
 ```
 
+The **cinema/** directory is the general directory for all cinema applications,
+each of which has an application and version directory. For example:
+
+```
+    cinema/explorer/1.8
+        css/
+        js/
+        lib/
+        license.md
+        databases.json
+```
+
 The cinema databases can be anywhere below the directory that contains the
 **cinema.html** and **cinema/** directory. So, you could also have this:
 
@@ -34,7 +46,7 @@ The cinema databases can be anywhere below the directory that contains the
        database_03.cdb
 ```
 
-- To add your data to the viewer, edit **cinema/databases.json** to include references to your data.
+- To add your data to the viewer, edit **cinema/explorer/\<version\>/databases.json** to include references to your data.
     - You may override the default location and name of the **databases.json**
       by passing arguments in the URL. The file must be located at or below
       the level of the **cinema.html** file. For example:
