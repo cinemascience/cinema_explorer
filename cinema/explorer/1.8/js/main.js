@@ -36,7 +36,7 @@ var databaseInfo;//An array of the databases as defined in databases.json
 var currentDbInfo //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
-var databaseFile = 'cinemaapp/databases.json'
+var databaseFile = 'cinema/explorer/1.8/databases.json'
 
 var loaded = false;
 

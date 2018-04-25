@@ -10,31 +10,31 @@ A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 # Usage
 
 ## Installation
-To install Cinema:Explorer, copy the **cinema.html** and **cinemaapp/**
+To install Cinema:Explorer, copy the **cinema.html** and **cinema/**
 directory to the same directory as your data. In a simple example, the installed
 files might look like this:
 
 ```
    cinema.html
-   cinemaapp/
+   cinema/
    database_01.cdb
    database_02.cdb
    database_03.cdb
 ```
 
 The cinema databases can be anywhere below the directory that contains the
-**cinema.html** and **cinemaapp/** directory. So, you could also have this:
+**cinema.html** and **cinema/** directory. So, you could also have this:
 
 ```
    cinema.html
-   cinemaapp/
+   cinema/
    data/
        database_01.cdb
        database_02.cdb
        database_03.cdb
 ```
 
-- To add your data to the viewer, edit **cinemaapp/databases.json** to include references to your data.
+- To add your data to the viewer, edit **cinema/databases.json** to include references to your data.
     - You may override the default location and name of the **databases.json**
       by passing arguments in the URL. The file must be located at or below
       the level of the **cinema.html** file. For example:
