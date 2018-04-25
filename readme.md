@@ -23,7 +23,9 @@ files might look like this:
 ```
 
 The **cinema/** directory is the general directory for all cinema applications,
-each of which has an application and version directory. For example:
+each of which has an application and version directory. This is designed to
+allow cinema applications to reside next to data, with a minimum of clutter from
+Cinema. For example:
 
 ```
     cinema/explorer/1.8
