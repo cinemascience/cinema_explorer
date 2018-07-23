@@ -164,7 +164,7 @@ function load() {
 	currentDbInfo = databaseInfo[d3.select('#database').node().value];
 	//Init Database
 	//Will call doneLoading if succesful, otherwise wil call loadingError
-	currentDb = new CINEMA_COMPONENTS.Database(currentDbInfo.directory,doneLoading,loadingError,function(updateInfo) {});
+	currentDb = new CINEMA_COMPONENTS.Database(currentDbInfo.directory,doneLoading,loadingError);
 }
 
 /**
