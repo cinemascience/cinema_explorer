@@ -13,7 +13,15 @@
 	},
 	{
 		"name" : "Bogus 1",
-		"directory" : "data/bogus/bogus_1.cdb"
+		"directory" : "data/bogus/bogus_1.cdb",
+		"filter" : "(^FILE)|(5$)",
+		"query": {
+			"Float_6" : [20, 70],
+			"Integer_2": [40, 60]
+		},
+		"selection": {
+			"Integer_3": [20, 50]
+		}
 	},
 	{
 		"name" : "Bogus 2",

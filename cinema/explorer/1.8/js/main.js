@@ -36,7 +36,7 @@ var databaseInfo;//An array of the databases as defined in databases.json
 var currentDbInfo //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
-var databaseFile = 'cinema/explorer/1.8/databases.json'
+var databaseFile = 'cinema/explorer/1.8/databases.json' //this can be overriden with HTTP params
 
 var loaded = false;
 
@@ -68,6 +68,9 @@ var slideOutOpen = false;
 // ---------------------------------------------------------------------------
 // Parse arguments that come in through the URL
 // ---------------------------------------------------------------------------
+
+// @TODO:
+// Javascript has some built in methods parsing HTTP parameters, maybe we should use those?
 var url = window.location.href;
 var urlArgs = url.split('?');
 
@@ -85,7 +88,7 @@ if (urlArgs.length > 1) {
     }
 }
 
-//Load databases.json and register databases into the database selection
+//Load database file and register databases into the database selection
 //then load the first one
 var jsonRequest = new XMLHttpRequest();
 jsonRequest.open("GET",databaseFile,true);
@@ -164,7 +167,11 @@ function load() {
 	currentDbInfo = databaseInfo[d3.select('#database').node().value];
 	//Init Database
 	//Will call doneLoading if succesful, otherwise wil call loadingError
-	currentDb = new CINEMA_COMPONENTS.Database(currentDbInfo.directory,doneLoading,loadingError);
+	currentDb = new CINEMA_COMPONENTS.Database(
+		currentDbInfo.directory,
+		doneLoading,
+		loadingError,
+		currentDbInfo.query);
 }
 
 /**
@@ -273,6 +280,11 @@ function doneLoading() {
 	if (currentDb.hasAxisOrdering) {
 		hasAxisOrdering = true;
 		buildAxisOrderPanel();
+	}
+
+	//If we defined a pre-set selection, set it in the pcoord chart
+	if (currentDbInfo.selection) {
+		pcoord.filterSelection(currentDbInfo.selection)
 	}
 }
 
