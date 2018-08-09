@@ -1,6 +1,6 @@
 # Cinema Spec-D Parallel Coordinates Viewer
 
-## Version 1.8
+## Version 1.9
 ### Author: Cameron Tauxe
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
@@ -26,7 +26,7 @@ allow cinema applications to reside next to data, with a minimum of clutter from
 Cinema. For example:
 
 ```
-    cinema/explorer/1.8
+    cinema/explorer/1.9
         css/
         js/
         lib/
@@ -122,6 +122,10 @@ If you make changes to either the viewer or the underlying Cinema Components lib
 - Mess with all the settings in the image spread component and ensure that sorting and pagination are accurate.
 
 # Changelog
+## V1.9
+- Update to v2.6.1 of Cinema Components Library
+- Can specify 'query' and 'selection' parameters in Databases.json
+- Alternative json to Databases.json can be specified with HTTP paramters
 ## V1.8
 - Now using v2.4 of Cinema Components library
 - Scatter Plot will remember which two dimensions you were viewing when changing tabs
