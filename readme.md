@@ -5,8 +5,6 @@
 
 A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 
-**To Do: Once this repository is on Github, update readme with pictures and better formatting because Teamforge has poor markdown support.**
-
 # Usage
 
 ## Installation
