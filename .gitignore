@@ -4,3 +4,4 @@ data/test.cdb
 databases_toIgnore.json
 getBuild.sh
 copyCSS.sh
+test/
