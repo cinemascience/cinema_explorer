@@ -1,8 +1,6 @@
 /*
 A general Parallel Coordinates-based viewer for Spec-D cinema databases 
 
-pcoord_viewer Version 1.8
-
 Copyright 2017 Los Alamos National Laboratory 
 
 Redistribution and use in source and binary forms, with or without 
@@ -36,7 +34,7 @@ var databaseInfo;//An array of the databases as defined in databases.json
 var currentDbInfo //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
-var databaseFile = 'cinema/explorer/1.8/databases.json' //this can be overriden with HTTP params
+var databaseFile = 'cinema/explorer/1.9/databases.json' //this can be overriden with HTTP params
 
 var loaded = false;
 
