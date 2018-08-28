@@ -8,12 +8,12 @@ A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
 # Usage
 
 ## Installation
-To install Cinema:Explorer, copy the **cinema.html** and **cinema/**
+To install Cinema:Explorer, copy the **cinema_explorer.html** and **cinema/**
 directory to the same directory as your data. In a simple example, the installed
 files might look like this:
 
 ```
-   cinema.html
+   cinema_explorer.html
    cinema/
    database_01.cdb
    database_02.cdb
@@ -49,19 +49,19 @@ The cinema databases can be anywhere below the directory that contains the
 - To add your data to the viewer, edit **cinema/explorer/\<version\>/databases.json** to include references to your data.
     - You may override the default location and name of the **databases.json**
       by passing arguments in the URL. The file must be located at or below
-      the level of the **cinema.html** file. For example:
+      the level of the **cinema_explorer.html** file. For example:
 ```
     file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
 ```
 
 - **databases.json** is a list of objects where each object must contain *at least* a 'name' field and 'directory' field. 'name' is the name of the databases that will be shown in the viewer. 'directory' is the path to the '.cdb' directory for your database.
-- Due to browser security features, most browsers will not read files if they are not in the same directory or in a subdirectory with **main.html**
+- Due to browser security features, most browsers will not read files if they are not in the same directory or in a subdirectory with **cinema_explorer.html**
 - Optionally, each object in **databases.json** may contain a 'filter' field. This field is a regular expression to filter out dimensions in the database from being displayed on the chart in the viewer. Any dimension whose name matches with the regex will be filtered out.
 - By default, any dimension beginning with FILE will be filtered, but this can be overridden with the 'filter' field.
 
 ## Viewing Data
 
-- Start the viewer by opening **main.html** in a web browser.
+- Start the viewer by opening **cinema_explorer.html** in a web browser.
 - By default, the first database listed in **databases.json** will be loaded. To load a different database, select it in the "Database Select" drop-down at the top of the page and press "Load." (For large databases (300+ rows) a warning will be displayed).
 - The viewer is split into two sections, the top section contains the Parallel Coordinates chart (called the pcoord area for brevity) and the bottom section contains a component for viewing the data, either a spread of images, or a scatter plot depending on the selected tab (this is called the view area). The two sections can be resized by click-and-dragging on the black bar between them.
 
