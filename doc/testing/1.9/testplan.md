@@ -33,20 +33,24 @@ path/to/cinema_explorer/cinema/explorer/1.9/databases.json
 Edit to add your databases.  The examples will be used below.
 
 ## Testing with example databases
-- Open cinema_explorer.html in Firefox.  Cinema:Explorer will open with the first database in the list: **sphere.cdb**.  You should see: ![sphere.png](figures/sphere.png)
+- Open cinema_explorer.html in Firefox.  Cinema:Explorer will open with the first database in the list: **sphere.cdb**.
+ You should see: ![sphere.png](figures/sphere.png)
 
-- Choose from the dropdown menu to load a different database: ![dropdownMenu.png](figures/dropdownMenu.png)
+- Choose from the dropdown menu to load a different database:
+ ![dropdownMenu.png](figures/dropdownMenu.png)
 
 - Check NaN, missing files, **axis_order.csv**:  Choose **Bogus 1** and click **Load**.  Bogus 1 includes an **axis_order.csv** file. It also contains NaN values and missing files.
 
 - Check multi-image: Choose **Sphere Multi-Image**.  Each row in the CSV file has two images.  Click on a left and a right image to bring up in modal view.  Return by clicking on background again.  
 
-- Check switch to Canvas mode for large databases: Choose **Big Bogus 2** and you will get a warning:  ![warningLarge.png](figures/warningLarge.png)
+- Check switch to Canvas mode for large databases: Choose **Big Bogus 2** and you will get a warning:
+  ![warningLarge.png](figures/warningLarge.png)
 
 - Check Scatter Plot mode: Load a database while the Scatter Plot tab is selected (as opposed to the default Image Spread):
 ![scatterplot.png](figures/scatterplot.png)
 
-- Check the **query panel**: ![queryPanel.png](figures/queryPanel.png)
+- Check the **query panel**:
+ ![queryPanel.png](figures/queryPanel.png)
 
 - Load a database while the query panel is open.
 
