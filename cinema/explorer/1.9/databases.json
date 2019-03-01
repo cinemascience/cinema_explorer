@@ -50,5 +50,9 @@
 	{
 		"name" : "Big Bogus 4",
 		"directory" : "data/bogus/big_bogus_4.cdb"
+	},
+	{
+		"name" : "Uncertainty Example",
+		"directory" : "data/example_uncertainty.cdb"
 	}
 ]

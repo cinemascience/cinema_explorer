@@ -159,7 +159,7 @@ body {
 .tab {
 	position: absolute;
 	box-sizing: border-box;
-	width: 50%;
+	width: 33%;
 	height: 35px;
 	top: 10px;
 	padding: 5px;
@@ -169,6 +169,9 @@ body {
 }
 .tab:first-child {
 	left: 0px;
+}
+.tab:nth-child(2) {
+    left: 33.5%;
 }
 .tab:last-child {
 	right: 0px;

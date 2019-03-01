@@ -46,7 +46,8 @@ var query; //The component for querying results
 //View type enum
 var viewType = Object.freeze({
 	IMAGESPREAD: 0,
-	SCATTERPLOT: 1
+	SCATTERPLOT: 1,
+	MULTILINE: 2
 });
 var currentView = viewType.IMAGESPREAD;
 
@@ -220,6 +221,9 @@ function doneLoading() {
 			view = new CINEMA_COMPONENTS.ScatterPlotCanvas(d3.select('#viewContainer').node(),currentDb,
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	}
+	else if (currentView == viewType.MULTILINE) {
+		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+	}
 
 	//Build Query panel
 	query = new CINEMA_COMPONENTS.Query(d3.select('#queryContainer').node(),currentDb);
@@ -342,6 +346,7 @@ function changeView(type) {
 			//change selected tab
 			d3.select('#imageSpreadTab').attr('selected','selected');
 			d3.select('#scatterPlotTab').attr('selected','default');
+			d3.select('#multiLineChartTab').attr('selected','default');
 		}
 		//Build ScatterPlot if Scatter Plot tab is selected
 		else if (currentView == viewType.SCATTERPLOT) {
@@ -355,6 +360,7 @@ function changeView(type) {
 			//change selected tab
 			d3.select('#scatterPlotTab').attr('selected','selected');
 			d3.select('#imageSpreadTab').attr('selected','default');
+			d3.select('#multiLineChartTab').attr('selected','default');
 
 			//add listeners to save dimensions when they are changed
 			view.dispatch.on('xchanged',function(d){savedDimensions.x = d;});
@@ -371,6 +377,12 @@ function changeView(type) {
 				node.value = savedDimensions.y;
 				d3.select(node).on('input').call(node);//trigger input event on select
 			}
+		}
+		else if (currentView = viewType.MULTILINE) {
+			//change selected tab
+			d3.select('#scatterPlotTab').attr('selected','default');
+			d3.select('#imageSpreadTab').attr('selected','default');
+			d3.select('#multiLineChartTab').attr('selected','selected');
 		}
 
 		//Set mouseover handler for new view and update size
