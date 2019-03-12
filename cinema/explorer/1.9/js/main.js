@@ -1,40 +1,40 @@
 /*
-A general Parallel Coordinates-based viewer for Spec-D cinema databases 
+A general Parallel Coordinates-based viewer for Spec-D cinema databases
 
-Copyright 2017 Los Alamos National Laboratory 
+Copyright 2017 Los Alamos National Laboratory
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this 
+1. Redistributions of source code must retain the above copyright notice, this
    list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
 
-3. Neither the name of the copyright holder nor the names of its contributors 
-   may be used to endorse or promote products derived from this software 
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
    without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE 
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 //Init variables
 var databaseInfo;//An array of the databases as defined in databases.json
-var currentDbInfo //Info for the currently selected database as defined in databases.json
+var currentDbInfo; //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
-var databaseFile = 'cinema/explorer/1.9/databases.json' //this can be overriden with HTTP params
+var databaseFile = 'cinema/explorer/1.9/databases.json'; //this can be overriden with HTTP params
 
 var loaded = false;
 
@@ -73,6 +73,7 @@ var slideOutOpen = false;
 var url = window.location.href;
 var urlArgs = url.split('?');
 
+
 if (urlArgs.length > 1) {
     var urlArgPairs = urlArgs[1].split('&');
 
@@ -82,7 +83,7 @@ if (urlArgs.length > 1) {
 
         // now look for the values you expect, and do something with them
         if (kvpair[0] == 'databases') {
-            databaseFile = kvpair[1]; 
+            databaseFile = kvpair[1];
         }
     }
 }
@@ -171,6 +172,8 @@ function load() {
 		doneLoading,
 		loadingError,
 		currentDbInfo.query);
+
+	console.log(currentDb)
 }
 
 /**
@@ -222,7 +225,8 @@ function doneLoading() {
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	}
 	else if (currentView == viewType.MULTILINE) {
-		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+		view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
+			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	}
 
 	//Build Query panel
@@ -338,8 +342,8 @@ function toggleShowHide() {
  */
 function changeView(type) {
 	if (loaded && type != currentView) {
-		currentView = type;
 		view.destroy();//destroy current view
+		currentView = type;
 		//Build ImageSpread if Image Spread tab is selected
 		if (currentView == viewType.IMAGESPREAD) {
 			view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
@@ -379,19 +383,33 @@ function changeView(type) {
 			}
 		}
 		else if (currentView = viewType.MULTILINE) {
+			view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
+				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 			//change selected tab
 			d3.select('#scatterPlotTab').attr('selected','default');
 			d3.select('#imageSpreadTab').attr('selected','default');
 			d3.select('#multiLineChartTab').attr('selected','selected');
+
+			view.dispatch
+				.on('mousemove', handleMouseMove)
+				.on('mouseenter', handleMouseEnter)
+				.on('mouseleave', handleMouseLeave)
+				.on('xchanged', function(d){savedDimensions.x = d;});
+
+			//set view to currently saved dimensions if defined
+			if (savedDimensions.x) {
+				var node = d3.select(view.xSelect).node();
+				node.value = savedDimensions.x;
+				d3.select(node).on('input').call(node);//trigger input event on select
+			}
 		}
+			//Set mouseover handler for new view and update size
+			view.dispatch.on('mouseover',handleMouseover);
+			updateViewContainerSize();
+			view.updateSize();
 
-		//Set mouseover handler for new view and update size
-		view.dispatch.on('mouseover',handleMouseover);
-		updateViewContainerSize();
-		view.updateSize();
-
-		//Set view's initial selection to the current pcoord selection
-		view.setSelection(pcoord.selection.slice());
+			//Set view's initial selection to the current pcoord selection
+			view.setSelection(pcoord.selection.slice());
 	}
 }
 
@@ -440,7 +458,7 @@ function buildAxisOrderPanel() {
 	axisOrderPanel.append('select')
 		.attr('id','axis_value');
 
-	//Add handler to pcoord chart to set value select to "custom" 
+	//Add handler to pcoord chart to set value select to "custom"
 	//when axis order is manually changed
 	pcoord.dispatch.on('axisorderchange',function() {
 		d3.select('#axis_value').node().value = -1;
@@ -475,6 +493,9 @@ function updateViewContainerSize() {
 //and update info pane
 //Also sets highlight in view if its a Scatter Plot
 function handleMouseover(index, event) {
+	//console.log("Handle MOuseover")
+	//console.log(index);
+	//console.log(event);
 	if (index != null) {
 		pcoord.setHighlightedPaths([index]);
 		if (currentView == viewType.SCATTERPLOT)
@@ -486,6 +507,24 @@ function handleMouseover(index, event) {
 			view.setHighlightedPoints([]);
 	}
 	updateInfoPane(index,event);
+}
+
+function handleMouseMove(index, event) {
+	if (currentView == viewType.MULTILINE) {
+		view.moved(event);
+	}
+}
+
+function handleMouseEnter(index, event) {
+	if (currentView == viewType.MULTILINE) {
+		view.entered();
+	}
+}
+
+function handleMouseLeave(index, event) {
+	if (currentView == viewType.MULTILINE) {
+		view.left();
+	}
 }
 
 //Update the info pane according to the index of the data

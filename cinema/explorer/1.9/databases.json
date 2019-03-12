@@ -1,5 +1,9 @@
 [
 	{
+		"name" : "UC volume",
+		"directory" : "data/volume_uncertainty.cdb"
+	},
+	{
 		"name" : "sphere",
 		"directory" : "data/sphere.cdb"
 	},
@@ -50,6 +54,14 @@
 	{
 		"name" : "Big Bogus 4",
 		"directory" : "data/bogus/big_bogus_4.cdb"
+	},
+	{
+		"name" : "volume",
+		"directory" : "data/volume.cdb"
+	},
+	{
+		"name" : "UC volume",
+		"directory" : "data/volume_uncertainty.cdb"
 	},
 	{
 		"name" : "Uncertainty Example",
