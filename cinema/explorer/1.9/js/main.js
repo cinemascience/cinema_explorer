@@ -173,7 +173,6 @@ function load() {
 		loadingError,
 		currentDbInfo.query);
 
-	console.log(currentDb)
 }
 
 /**
