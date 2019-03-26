@@ -393,6 +393,8 @@ function changeView(type) {
 				.on('mousemove', handleMouseMove)
 				.on('mouseenter', handleMouseEnter)
 				.on('mouseleave', handleMouseLeave)
+				.on('mousedown', handleMouseDown)
+				.on('mouseup', handleMouseUp)
 				.on('xchanged', function(d){savedDimensions.x = d;});
 
 			//set view to currently saved dimensions if defined
@@ -516,13 +518,26 @@ function handleMouseMove(index, event) {
 
 function handleMouseEnter(index, event) {
 	if (currentView == viewType.MULTILINE) {
-		view.entered();
+		view.entered(event);
 	}
 }
 
 function handleMouseLeave(index, event) {
 	if (currentView == viewType.MULTILINE) {
-		view.left();
+		view.left(event);
+	}
+}
+
+function handleMouseDown(index, event) {
+	if (currentView == viewType.MULTILINE) {
+		view.down(event);
+	}
+}
+
+function handleMouseUp(index, event) {
+	if (currentView == viewType.MULTILINE) {
+		view.up(event);
+		pcoord.addSelectionByDimensionValues(view.dragResult);
 	}
 }
 
