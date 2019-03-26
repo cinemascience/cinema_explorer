@@ -249,6 +249,16 @@ function doneLoading() {
 		view.dispatch.on('ychanged',function(d){savedDimensions.y = d;});
 	}
 
+	if(currentView == viewType.MULTILINE) {
+		view.dispatch
+			.on('mousemove', handleMouseMove)
+			.on('mouseenter', handleMouseEnter)
+			.on('mouseleave', handleMouseLeave)
+			.on('mousedown', handleMouseDown)
+			.on('mouseup', handleMouseUp)
+			.on('xchanged', function(d){savedDimensions.x = d;});
+	}
+
 	//Set styles for query data
 	//Style is interpreted differently by SVG and Canvas components
 	if (currentPcoord == pcoordType.SVG) {
