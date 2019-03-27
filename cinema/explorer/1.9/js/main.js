@@ -172,7 +172,6 @@ function load() {
 		doneLoading,
 		loadingError,
 		currentDbInfo.query);
-
 }
 
 /**
@@ -225,7 +224,8 @@ function doneLoading() {
 	}
 	else if (currentView == viewType.MULTILINE) {
 		view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
-			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
+			currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
 	}
 
 	//Build Query panel
@@ -242,7 +242,8 @@ function doneLoading() {
 
 	//Set mouseover handler for pcoord and views component
 	pcoord.dispatch.on("mouseover",handleMouseover);
-	view.dispatch.on('mouseover',handleMouseover);
+	if (currentView != viewType.MULTILINE)
+		view.dispatch.on('mouseover',handleMouseover);
 
 	//If the view is a Scatter Plot, set listeners to save dimensions when they are changed
 	if (currentView == viewType.SCATTERPLOT) {
@@ -394,7 +395,7 @@ function changeView(type) {
 		}
 		else if (currentView == viewType.MULTILINE) {
 			view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
-				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter), currentDbInfo.image_measures);
 			//change selected tab
 			d3.select('#scatterPlotTab').attr('selected','default');
 			d3.select('#imageSpreadTab').attr('selected','default');
