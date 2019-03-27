@@ -236,7 +236,8 @@ function doneLoading() {
 	pcoord.dispatch.on('selectionchange',function(selection) {
 		d3.select('#selectionStats')
 			.text(selection.length+' out of '+currentDb.data.length+' results selected');
-		view.setSelection(selection);
+		if (currentView != viewType.MULTILINE)
+			view.setSelection(selection);
 	});
 
 	//Set mouseover handler for pcoord and views component
@@ -391,7 +392,7 @@ function changeView(type) {
 				d3.select(node).on('input').call(node);//trigger input event on select
 			}
 		}
-		else if (currentView = viewType.MULTILINE) {
+		else if (currentView == viewType.MULTILINE) {
 			view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 			//change selected tab
@@ -415,12 +416,14 @@ function changeView(type) {
 			}
 		}
 			//Set mouseover handler for new view and update size
-			view.dispatch.on('mouseover',handleMouseover);
+			if (currentView != viewType.MULTILINE)
+				view.dispatch.on('mouseover',handleMouseover);
 			updateViewContainerSize();
 			view.updateSize();
 
 			//Set view's initial selection to the current pcoord selection
-			view.setSelection(pcoord.selection.slice());
+			if (currentView != viewType.MULTILINE)
+				view.setSelection(pcoord.selection.slice());
 	}
 }
 
@@ -504,9 +507,6 @@ function updateViewContainerSize() {
 //and update info pane
 //Also sets highlight in view if its a Scatter Plot
 function handleMouseover(index, event) {
-	//console.log("Handle MOuseover")
-	//console.log(index);
-	//console.log(event);
 	if (index != null) {
 		pcoord.setHighlightedPaths([index]);
 		if (currentView == viewType.SCATTERPLOT)
@@ -520,30 +520,35 @@ function handleMouseover(index, event) {
 	updateInfoPane(index,event);
 }
 
+//Select path and datapoint, scale draging rectange
 function handleMouseMove(index, event) {
 	if (currentView == viewType.MULTILINE) {
 		view.moved(event);
 	}
 }
 
+//Rerender lines, show dot
 function handleMouseEnter(index, event) {
 	if (currentView == viewType.MULTILINE) {
 		view.entered(event);
 	}
 }
 
+//Rerender lines, remove dot
 function handleMouseLeave(index, event) {
 	if (currentView == viewType.MULTILINE) {
 		view.left(event);
 	}
 }
 
+//Initiate dragging
 function handleMouseDown(index, event) {
 	if (currentView == viewType.MULTILINE) {
 		view.down(event);
 	}
 }
 
+//Finalize dragging, add selection
 function handleMouseUp(index, event) {
 	if (currentView == viewType.MULTILINE) {
 		view.up(event);
