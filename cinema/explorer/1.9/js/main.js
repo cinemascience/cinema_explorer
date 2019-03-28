@@ -223,9 +223,16 @@ function doneLoading() {
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	}
 	else if (currentView == viewType.MULTILINE) {
+		if(typeof currentDbInfo.image_measures !== 'undefined') {
 		view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
 			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
 			currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
+		}
+		else {
+			window.alert('This database does not have any image measures. \n' +
+			'Please add an image measure to databases.json \n' +
+			'Use "image_measures" : ["measure_prefix1",...] property');
+		}
 	}
 
 	//Build Query panel
@@ -394,37 +401,47 @@ function changeView(type) {
 			}
 		}
 		else if (currentView == viewType.MULTILINE) {
-			view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
-				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter), currentDbInfo.image_measures);
-			//change selected tab
 			d3.select('#scatterPlotTab').attr('selected','default');
 			d3.select('#imageSpreadTab').attr('selected','default');
 			d3.select('#multiLineChartTab').attr('selected','selected');
+			if(typeof currentDbInfo.image_measures !== 'undefined') {
+				view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
+					currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
+					currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
+					//change selected tab
 
-			view.dispatch
-				.on('mousemove', handleMouseMove)
-				.on('mouseenter', handleMouseEnter)
-				.on('mouseleave', handleMouseLeave)
-				.on('mousedown', handleMouseDown)
-				.on('mouseup', handleMouseUp)
-				.on('xchanged', function(d){savedDimensions.x = d;});
+				view.dispatch
+					.on('mousemove', handleMouseMove)
+					.on('mouseenter', handleMouseEnter)
+					.on('mouseleave', handleMouseLeave)
+					.on('mousedown', handleMouseDown)
+					.on('mouseup', handleMouseUp)
+					.on('xchanged', function(d){savedDimensions.x = d;});
 
-			//set view to currently saved dimensions if defined
-			if (savedDimensions.x) {
-				var node = d3.select(view.xSelect).node();
-				node.value = savedDimensions.x;
-				d3.select(node).on('input').call(node);//trigger input event on select
+					//set view to currently saved dimensions if defined
+				if (savedDimensions.x) {
+					var node = d3.select(view.xSelect).node();
+					node.value = savedDimensions.x;
+					d3.select(node).on('input').call(node);//trigger input event on select
+				}
+			}
+			else {
+				window.alert('This database does not have any image measures. \n' +
+				'Please add an image measure to databases.json \n' +
+				'Use "image_measures" : ["measure_prefix1",...] property');
 			}
 		}
-			//Set mouseover handler for new view and update size
-			if (currentView != viewType.MULTILINE)
-				view.dispatch.on('mouseover',handleMouseover);
-			updateViewContainerSize();
-			view.updateSize();
 
-			//Set view's initial selection to the current pcoord selection
-			if (currentView != viewType.MULTILINE)
-				view.setSelection(pcoord.selection.slice());
+		//Set mouseover handler for new view and update size
+		if (currentView != viewType.MULTILINE)
+			view.dispatch.on('mouseover',handleMouseover);
+
+		updateViewContainerSize();
+		view.updateSize();
+
+		//Set view's initial selection to the current pcoord selection
+		if (currentView != viewType.MULTILINE)
+			view.setSelection(pcoord.selection.slice());
 	}
 }
 
