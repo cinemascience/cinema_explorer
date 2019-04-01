@@ -53,6 +53,8 @@ var currentView = viewType.IMAGESPREAD;
 
 //save last-used dimensions on scatter plot between tab switches
 var savedDimensions = {};
+var multilineCheckboxState;
+var imagespreadOptionsState;
 
 //Pcoord type enum
 var pcoordType = Object.freeze({
@@ -212,7 +214,8 @@ function doneLoading() {
 
 	//Build view depending on selected viewType
 	if (currentView == viewType.IMAGESPREAD)
-		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb,
+		currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
 	else if (currentView == viewType.SCATTERPLOT) {
 		//Use either an SVG or a Canvas Scatter Plot depending on pcoordType
 		if (currentPcoord == pcoordType.SVG)
@@ -360,15 +363,23 @@ function toggleShowHide() {
  */
 function changeView(type) {
 	if (loaded && type != currentView) {
+		if(currentView == viewType.MULTILINE)
+			multilineCheckboxState = view.getCheckboxStates();
+		if(currentView == viewType.IMAGESPREAD)
+			imagespreadOptionsState = view.getOptionsData();
+
 		view.destroy();//destroy current view
 		currentView = type;
 		//Build ImageSpread if Image Spread tab is selected
 		if (currentView == viewType.IMAGESPREAD) {
-			view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+			view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb,
+			currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
 			//change selected tab
 			d3.select('#imageSpreadTab').attr('selected','selected');
 			d3.select('#scatterPlotTab').attr('selected','default');
 			d3.select('#multiLineChartTab').attr('selected','default');
+
+			view.setOptionsData(imagespreadOptionsState);
 		}
 		//Build ScatterPlot if Scatter Plot tab is selected
 		else if (currentView == viewType.SCATTERPLOT) {
@@ -424,6 +435,9 @@ function changeView(type) {
 					node.value = savedDimensions.x;
 					d3.select(node).on('input').call(node);//trigger input event on select
 				}
+
+				if(typeof multilineCheckboxState != "undefined")
+					view.setCheckboxStates(multilineCheckboxState);
 			}
 			else {
 				window.alert('This database does not have any image measures. \n' +
