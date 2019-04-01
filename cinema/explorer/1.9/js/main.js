@@ -191,6 +191,9 @@ function loadingError(error) {
 function doneLoading() {
 	loaded = true;
 
+	multilineCheckboxState = undefined;
+	imagespreadOptionsState = undefined;
+
 	//Build pcoord
 	//Use a PcoordCanvas for larger datasets to prevent slowdown
 	if (currentDb.data.length > 300) {
