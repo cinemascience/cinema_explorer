@@ -266,11 +266,7 @@ function doneLoading() {
 
 	if(currentView == viewType.MULTILINE) {
 		view.dispatch
-			.on('mousemove', handleMouseMove)
-			.on('mouseenter', handleMouseEnter)
-			.on('mouseleave', handleMouseLeave)
-			.on('mousedown', handleMouseDown)
-			.on('mouseup', handleMouseUp)
+			.on('selectionchanged', handleSelectionChanged)
 			.on('xchanged', function(d){savedDimensions.x = d;});
 	}
 
@@ -365,10 +361,17 @@ function toggleShowHide() {
  * Called by clicking one of the tabs
  */
 function changeView(type) {
+	if(typeof currentDbInfo.image_measures === 'undefined' && type === viewType.MULTILINE) {
+		window.alert('This database does not have any image measures. \n' +
+		'Please add an image measure to databases.json \n' +
+		'Use "image_measures" : ["measure_prefix1",...] property');
+		return;
+	}
+
 	if (loaded && type != currentView) {
-		if(currentView == viewType.MULTILINE)
+		if(currentView == viewType.MULTILINE && typeof view !== "undefined")
 			multilineCheckboxState = view.getCheckboxStates();
-		if(currentView == viewType.IMAGESPREAD)
+		if(currentView == viewType.IMAGESPREAD && typeof view !== "undefined")
 			imagespreadOptionsState = view.getOptionsData();
 
 		view.destroy();//destroy current view
@@ -382,7 +385,9 @@ function changeView(type) {
 			d3.select('#scatterPlotTab').attr('selected','default');
 			d3.select('#multiLineChartTab').attr('selected','default');
 
-			view.setOptionsData(imagespreadOptionsState);
+			if(typeof imagespreadOptionsState !== "undefined") {
+				view.setOptionsData(imagespreadOptionsState);
+			}
 		}
 		//Build ScatterPlot if Scatter Plot tab is selected
 		else if (currentView == viewType.SCATTERPLOT) {
@@ -418,34 +423,24 @@ function changeView(type) {
 			d3.select('#scatterPlotTab').attr('selected','default');
 			d3.select('#imageSpreadTab').attr('selected','default');
 			d3.select('#multiLineChartTab').attr('selected','selected');
-			if(typeof currentDbInfo.image_measures !== 'undefined') {
-				view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
-					currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
-					currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
-					//change selected tab
+			view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
+				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
+				currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
+				//change selected tab
 
-				view.dispatch
-					.on('mousemove', handleMouseMove)
-					.on('mouseenter', handleMouseEnter)
-					.on('mouseleave', handleMouseLeave)
-					.on('mousedown', handleMouseDown)
-					.on('mouseup', handleMouseUp)
-					.on('xchanged', function(d){savedDimensions.x = d;});
+			view.dispatch
+				.on('selectionchanged', handleSelectionChanged)
+				.on('xchanged', function(d){savedDimensions.x = d;});
 
-					//set view to currently saved dimensions if defined
-				if (savedDimensions.x) {
-					var node = d3.select(view.xSelect).node();
-					node.value = savedDimensions.x;
-					d3.select(node).on('input').call(node);//trigger input event on select
-				}
-
-				if(typeof multilineCheckboxState != "undefined")
-					view.setCheckboxStates(multilineCheckboxState);
+				//set view to currently saved dimensions if defined
+			if (savedDimensions.x) {
+				var node = d3.select(view.xSelect).node();
+				node.value = savedDimensions.x;
+				d3.select(node).on('input').call(node);//trigger input event on select
 			}
-			else {
-				window.alert('This database does not have any image measures. \n' +
-				'Please add an image measure to databases.json \n' +
-				'Use "image_measures" : ["measure_prefix1",...] property');
+
+			if(typeof multilineCheckboxState !== "undefined") {
+				view.setCheckboxStates(multilineCheckboxState);
 			}
 		}
 
@@ -584,9 +579,8 @@ function handleMouseDown(index, event) {
 }
 
 //Finalize dragging, add selection
-function handleMouseUp(index, event) {
+function handleSelectionChanged(index, event) {
 	if (currentView == viewType.MULTILINE) {
-		view.up(event);
 		pcoord.addSelectionByDimensionValues(view.dragResult);
 	}
 }
