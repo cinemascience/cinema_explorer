@@ -101,8 +101,19 @@ The cinema databases can be anywhere below the directory that contains the
 - The two dimensions used as the x and y axes in the chart can be changed with the drop-down menus on the left-side and bottom of the panel.
 - If data contains NaN or undefined values in at least one of the two dimensions selected, the data will not be plotted and a warning will be displayed in the lower-right corner of the panel.
 
+## Using the Line chart
+
+- Add "image_measures"/"exclude_dimension" : ["prefix1", ...] to the databases.json file to have dimension to show or to exclude comepletely
+- Show/hide dimensions using the checkboxes
+- Select an x-axis by the dropdown menu
+- Select a range on the x-axis by holding down the left mouse button and dragging it
+
 
 # Changelog
+## V1.9.1
+- Update to v2.7.1 of Cinema Components Library
+- Added the Line Chart component
+
 ## V1.9
 - Update to v2.6.1 of Cinema Components Library
 - Can specify 'query' and 'selection' parameters in Databases.json

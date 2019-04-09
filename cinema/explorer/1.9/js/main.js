@@ -47,13 +47,13 @@ var query; //The component for querying results
 var viewType = Object.freeze({
 	IMAGESPREAD: 0,
 	SCATTERPLOT: 1,
-	MULTILINE: 2
+	LINECHART: 2
 });
 var currentView = viewType.IMAGESPREAD;
 
 //save last-used dimensions on scatter plot between tab switches
 var savedDimensions = {};
-var multilineCheckboxState;
+var linechartCheckboxState;
 var imagespreadOptionsState;
 
 //Pcoord type enum
@@ -191,7 +191,7 @@ function loadingError(error) {
 function doneLoading() {
 	loaded = true;
 
-	multilineCheckboxState = undefined;
+	linechartCheckboxState = undefined;
 	imagespreadOptionsState = undefined;
 
 	//Build pcoord
@@ -228,7 +228,7 @@ function doneLoading() {
 			view = new CINEMA_COMPONENTS.ScatterPlotCanvas(d3.select('#viewContainer').node(),currentDb,
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
 	}
-	else if (currentView == viewType.MULTILINE) {
+	else if (currentView == viewType.LINECHART) {
 		if(typeof currentDbInfo.image_measures !== 'undefined') {
 		view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
 			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
@@ -249,13 +249,13 @@ function doneLoading() {
 	pcoord.dispatch.on('selectionchange',function(selection) {
 		d3.select('#selectionStats')
 			.text(selection.length+' out of '+currentDb.data.length+' results selected');
-		if (currentView != viewType.MULTILINE)
+		if (currentView != viewType.LINECHART)
 			view.setSelection(selection);
 	});
 
 	//Set mouseover handler for pcoord and views component
 	pcoord.dispatch.on("mouseover",handleMouseover);
-	if (currentView != viewType.MULTILINE)
+	if (currentView != viewType.LINECHART)
 		view.dispatch.on('mouseover',handleMouseover);
 
 	//If the view is a Scatter Plot, set listeners to save dimensions when they are changed
@@ -264,7 +264,7 @@ function doneLoading() {
 		view.dispatch.on('ychanged',function(d){savedDimensions.y = d;});
 	}
 
-	if(currentView == viewType.MULTILINE) {
+	if(currentView == viewType.LINECHART) {
 		view.dispatch
 			.on('selectionchanged', handleSelectionChanged)
 			.on('xchanged', function(d){savedDimensions.x = d;});
@@ -361,7 +361,7 @@ function toggleShowHide() {
  * Called by clicking one of the tabs
  */
 function changeView(type) {
-	if(typeof currentDbInfo.image_measures === 'undefined' && type === viewType.MULTILINE) {
+	if(typeof currentDbInfo.image_measures === 'undefined' && type === viewType.LINECHART) {
 		window.alert('This database does not have any image measures. \n' +
 		'Please add an image measure to databases.json \n' +
 		'Use "image_measures" : ["measure_prefix1",...] property');
@@ -369,8 +369,8 @@ function changeView(type) {
 	}
 
 	if (loaded && type != currentView) {
-		if(currentView == viewType.MULTILINE && typeof view !== "undefined")
-			multilineCheckboxState = view.getCheckboxStates();
+		if(currentView == viewType.LINECHART && typeof view !== "undefined")
+			linechartCheckboxState = view.getCheckboxStates();
 		if(currentView == viewType.IMAGESPREAD && typeof view !== "undefined")
 			imagespreadOptionsState = view.getOptionsData();
 
@@ -383,7 +383,7 @@ function changeView(type) {
 			//change selected tab
 			d3.select('#imageSpreadTab').attr('selected','selected');
 			d3.select('#scatterPlotTab').attr('selected','default');
-			d3.select('#multiLineChartTab').attr('selected','default');
+			d3.select('#linechartChartTab').attr('selected','default');
 
 			if(typeof imagespreadOptionsState !== "undefined") {
 				view.setOptionsData(imagespreadOptionsState);
@@ -401,7 +401,7 @@ function changeView(type) {
 			//change selected tab
 			d3.select('#scatterPlotTab').attr('selected','selected');
 			d3.select('#imageSpreadTab').attr('selected','default');
-			d3.select('#multiLineChartTab').attr('selected','default');
+			d3.select('#linechartChartTab').attr('selected','default');
 
 			//add listeners to save dimensions when they are changed
 			view.dispatch.on('xchanged',function(d){savedDimensions.x = d;});
@@ -419,10 +419,10 @@ function changeView(type) {
 				d3.select(node).on('input').call(node);//trigger input event on select
 			}
 		}
-		else if (currentView == viewType.MULTILINE) {
+		else if (currentView == viewType.LINECHART) {
 			d3.select('#scatterPlotTab').attr('selected','default');
 			d3.select('#imageSpreadTab').attr('selected','default');
-			d3.select('#multiLineChartTab').attr('selected','selected');
+			d3.select('#linechartChartTab').attr('selected','selected');
 			view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
 				currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
@@ -439,20 +439,20 @@ function changeView(type) {
 				d3.select(node).on('input').call(node);//trigger input event on select
 			}
 
-			if(typeof multilineCheckboxState !== "undefined") {
-				view.setCheckboxStates(multilineCheckboxState);
+			if(typeof linechartCheckboxState !== "undefined") {
+				view.setCheckboxStates(linechartCheckboxState);
 			}
 		}
 
 		//Set mouseover handler for new view and update size
-		if (currentView != viewType.MULTILINE)
+		if (currentView != viewType.LINECHART)
 			view.dispatch.on('mouseover',handleMouseover);
 
 		updateViewContainerSize();
 		view.updateSize();
 
 		//Set view's initial selection to the current pcoord selection
-		if (currentView != viewType.MULTILINE)
+		if (currentView != viewType.LINECHART)
 			view.setSelection(pcoord.selection.slice());
 	}
 }
@@ -552,35 +552,35 @@ function handleMouseover(index, event) {
 
 //Select path and datapoint, scale draging rectange
 function handleMouseMove(index, event) {
-	if (currentView == viewType.MULTILINE) {
+	if (currentView == viewType.LINECHART) {
 		view.moved(event);
 	}
 }
 
 //Rerender lines, show dot
 function handleMouseEnter(index, event) {
-	if (currentView == viewType.MULTILINE) {
+	if (currentView == viewType.LINECHART) {
 		view.entered(event);
 	}
 }
 
 //Rerender lines, remove dot
 function handleMouseLeave(index, event) {
-	if (currentView == viewType.MULTILINE) {
+	if (currentView == viewType.LINECHART) {
 		view.left(event);
 	}
 }
 
 //Initiate dragging
 function handleMouseDown(index, event) {
-	if (currentView == viewType.MULTILINE) {
+	if (currentView == viewType.LINECHART) {
 		view.down(event);
 	}
 }
 
 //Finalize dragging, add selection
 function handleSelectionChanged(index, event) {
-	if (currentView == viewType.MULTILINE) {
+	if (currentView == viewType.LINECHART) {
 		pcoord.addSelectionByDimensionValues(view.dragResult);
 	}
 }

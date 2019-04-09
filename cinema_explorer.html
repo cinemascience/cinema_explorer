@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang='en'>
 <!--
-A general Parallel Coordinates-based viewer for Spec-D cinema databases 
+A general Parallel Coordinates-based viewer for Spec-D cinema databases
 
 pcoord_viewer Version 1.9
 
 This software is open source software available under the BSD-3 license.
- 
+
 Copyright (c) 2018, Los Alamos National Security, LLC All rights reserved.
-  
+
 Copyright 2018. Los Alamos National Security, LLC. This software was produced
 under U.S. Government contract DE-AC52-06NA25396 for Los Alamos National
 Laboratory (LANL), which is operated by Los Alamos National Security, LLC for
@@ -18,12 +18,12 @@ ALAMOS NATIONAL SECURITY, LLC MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR
 ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  If software is modified
 to produce derivative works, such modified software should be clearly marked,
 so as not to confuse it with the version available from LANL.
-   
+
 Additionally, redistribution and use in source and binary forms, with or
 without modification, are permitted provided that the following conditions
 are met:
 
-    1. Redistributions of source code must retain the above copyright notice, 
+    1. Redistributions of source code must retain the above copyright notice,
        this list of conditions and the following disclaimer.
 
     2. Redistributions in binary form must reproduce the above copyright
@@ -32,9 +32,9 @@ are met:
 
     3. Neither the name of Los Alamos National Security, LLC, Los Alamos
        National Laboratory, LANL, the U.S. Government, nor the names of its
-       contributors may be used to endorse or promote products derived from 
+       contributors may be used to endorse or promote products derived from
        this software without specific prior written permission.
-    
+
 THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
 NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -60,8 +60,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <script type="text/javascript" src="https://unpkg.com/vtk.js"></script>
 
     <!-- components -->
-	<link rel='stylesheet' href='/Users/maack/cinema_fork/cinema_components/build/CinemaComponents.v2.7.0.min.css'>
-	<script src='/Users/maack/cinema_fork/cinema_components/build/CinemaComponents.v2.7.0.min.js'></script>
+	<link rel='stylesheet' href='https://cinemascience.github.io/release/CinemaComponents.v2.7.1.min.css'>
+	<script src='https://cinemascience.github.io/release/CinemaComponents.v2.7.1.min.js'></script>
 
 	<!-- alternative local components files (for testing builds) (please comment this out before commiting)-->
 	<!--
@@ -113,7 +113,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 	<div id="tabContainer">
 		<div class="tab" id="imageSpreadTab" selected="selected" onclick="changeView(viewType.IMAGESPREAD)">Image Spread</div>
 		<div class="tab" id="scatterPlotTab" selected="default" onclick="changeView(viewType.SCATTERPLOT)">Scatter Plot</div>
-		<div class="tab" id="multiLineChartTab" selected="default" onclick="changeView(viewType.MULTILINE)">Multiline Chart</div>
+		<div class="tab" id="linechartChartTab" selected="default" onclick="changeView(viewType.LINECHART)">Line Chart</div>
 	</div>
 	<!--The container for whichever component is selected-->
 	<div id="viewContainer"></div>
