@@ -112,7 +112,7 @@ The cinema databases can be anywhere below the directory that contains the
 # Changelog
 ## V1.9.1
 - Update to v2.7.1 of Cinema Components Library
-- Added the Line Chart component
+- Embedded the Line Chart component as a tab
 
 ## V1.9
 - Update to v2.6.1 of Cinema Components Library
