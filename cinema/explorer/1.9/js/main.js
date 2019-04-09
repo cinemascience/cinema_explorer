@@ -550,34 +550,6 @@ function handleMouseover(index, event) {
 	updateInfoPane(index,event);
 }
 
-//Select path and datapoint, scale draging rectange
-function handleMouseMove(index, event) {
-	if (currentView == viewType.LINECHART) {
-		view.moved(event);
-	}
-}
-
-//Rerender lines, show dot
-function handleMouseEnter(index, event) {
-	if (currentView == viewType.LINECHART) {
-		view.entered(event);
-	}
-}
-
-//Rerender lines, remove dot
-function handleMouseLeave(index, event) {
-	if (currentView == viewType.LINECHART) {
-		view.left(event);
-	}
-}
-
-//Initiate dragging
-function handleMouseDown(index, event) {
-	if (currentView == viewType.LINECHART) {
-		view.down(event);
-	}
-}
-
 //Finalize dragging, add selection
 function handleSelectionChanged(index, event) {
 	if (currentView == viewType.LINECHART) {
