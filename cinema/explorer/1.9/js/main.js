@@ -1,40 +1,40 @@
 /*
-A general Parallel Coordinates-based viewer for Spec-D cinema databases 
+A general Parallel Coordinates-based viewer for Spec-D cinema databases
 
-Copyright 2017 Los Alamos National Laboratory 
+Copyright 2017 Los Alamos National Laboratory
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice, this 
+1. Redistributions of source code must retain the above copyright notice, this
    list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation 
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
 
-3. Neither the name of the copyright holder nor the names of its contributors 
-   may be used to endorse or promote products derived from this software 
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products derived from this software
    without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE 
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL 
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 //Init variables
 var databaseInfo;//An array of the databases as defined in databases.json
-var currentDbInfo //Info for the currently selected database as defined in databases.json
+var currentDbInfo; //Info for the currently selected database as defined in databases.json
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
-var databaseFile = 'cinema/explorer/1.9/databases.json' //this can be overriden with HTTP params
+var databaseFile = 'cinema/explorer/1.9/databases.json'; //this can be overriden with HTTP params
 
 var loaded = false;
 
@@ -46,12 +46,15 @@ var query; //The component for querying results
 //View type enum
 var viewType = Object.freeze({
 	IMAGESPREAD: 0,
-	SCATTERPLOT: 1
+	SCATTERPLOT: 1,
+	LINECHART: 2
 });
 var currentView = viewType.IMAGESPREAD;
 
 //save last-used dimensions on scatter plot between tab switches
 var savedDimensions = {};
+var linechartCheckboxState;
+var imagespreadOptionsState;
 
 //Pcoord type enum
 var pcoordType = Object.freeze({
@@ -72,6 +75,7 @@ var slideOutOpen = false;
 var url = window.location.href;
 var urlArgs = url.split('?');
 
+
 if (urlArgs.length > 1) {
     var urlArgPairs = urlArgs[1].split('&');
 
@@ -81,7 +85,7 @@ if (urlArgs.length > 1) {
 
         // now look for the values you expect, and do something with them
         if (kvpair[0] == 'databases') {
-            databaseFile = kvpair[1]; 
+            databaseFile = kvpair[1];
         }
     }
 }
@@ -187,6 +191,9 @@ function loadingError(error) {
 function doneLoading() {
 	loaded = true;
 
+	linechartCheckboxState = undefined;
+	imagespreadOptionsState = undefined;
+
 	//Build pcoord
 	//Use a PcoordCanvas for larger datasets to prevent slowdown
 	if (currentDb.data.length > 300) {
@@ -210,7 +217,8 @@ function doneLoading() {
 
 	//Build view depending on selected viewType
 	if (currentView == viewType.IMAGESPREAD)
-		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb,
+		currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
 	else if (currentView == viewType.SCATTERPLOT) {
 		//Use either an SVG or a Canvas Scatter Plot depending on pcoordType
 		if (currentPcoord == pcoordType.SVG)
@@ -219,6 +227,18 @@ function doneLoading() {
 		else
 			view = new CINEMA_COMPONENTS.ScatterPlotCanvas(d3.select('#viewContainer').node(),currentDb,
 				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter));
+	}
+	else if (currentView == viewType.LINECHART) {
+		if(typeof currentDbInfo.image_measures !== 'undefined') {
+		view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
+			currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
+			currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
+		}
+		else {
+			window.alert('This database does not have any image measures. \n' +
+			'Please add an image measure to databases.json \n' +
+			'Use "image_measures" : ["measure_prefix1",...] property');
+		}
 	}
 
 	//Build Query panel
@@ -229,17 +249,25 @@ function doneLoading() {
 	pcoord.dispatch.on('selectionchange',function(selection) {
 		d3.select('#selectionStats')
 			.text(selection.length+' out of '+currentDb.data.length+' results selected');
-		view.setSelection(selection);
+		if (currentView != viewType.LINECHART)
+			view.setSelection(selection);
 	});
 
 	//Set mouseover handler for pcoord and views component
 	pcoord.dispatch.on("mouseover",handleMouseover);
-	view.dispatch.on('mouseover',handleMouseover);
+	if (currentView != viewType.LINECHART)
+		view.dispatch.on('mouseover',handleMouseover);
 
 	//If the view is a Scatter Plot, set listeners to save dimensions when they are changed
 	if (currentView == viewType.SCATTERPLOT) {
 		view.dispatch.on('xchanged',function(d){savedDimensions.x = d;});
 		view.dispatch.on('ychanged',function(d){savedDimensions.y = d;});
+	}
+
+	if(currentView == viewType.LINECHART) {
+		view.dispatch
+			.on('selectionchanged', handleSelectionChanged)
+			.on('xchanged', function(d){savedDimensions.x = d;});
 	}
 
 	//Set styles for query data
@@ -333,15 +361,33 @@ function toggleShowHide() {
  * Called by clicking one of the tabs
  */
 function changeView(type) {
+	if(typeof currentDbInfo.image_measures === 'undefined' && type === viewType.LINECHART) {
+		window.alert('This database does not have any image measures. \n' +
+		'Please add an image measure to databases.json \n' +
+		'Use "image_measures" : ["measure_prefix1",...] property');
+		return;
+	}
+
 	if (loaded && type != currentView) {
-		currentView = type;
+		if(currentView == viewType.LINECHART && typeof view !== "undefined")
+			linechartCheckboxState = view.getCheckboxStates();
+		if(currentView == viewType.IMAGESPREAD && typeof view !== "undefined")
+			imagespreadOptionsState = view.getOptionsData();
+
 		view.destroy();//destroy current view
+		currentView = type;
 		//Build ImageSpread if Image Spread tab is selected
 		if (currentView == viewType.IMAGESPREAD) {
-			view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb);
+			view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb,
+			currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
 			//change selected tab
 			d3.select('#imageSpreadTab').attr('selected','selected');
 			d3.select('#scatterPlotTab').attr('selected','default');
+			d3.select('#linechartChartTab').attr('selected','default');
+
+			if(typeof imagespreadOptionsState !== "undefined") {
+				view.setOptionsData(imagespreadOptionsState);
+			}
 		}
 		//Build ScatterPlot if Scatter Plot tab is selected
 		else if (currentView == viewType.SCATTERPLOT) {
@@ -355,6 +401,7 @@ function changeView(type) {
 			//change selected tab
 			d3.select('#scatterPlotTab').attr('selected','selected');
 			d3.select('#imageSpreadTab').attr('selected','default');
+			d3.select('#linechartChartTab').attr('selected','default');
 
 			//add listeners to save dimensions when they are changed
 			view.dispatch.on('xchanged',function(d){savedDimensions.x = d;});
@@ -372,14 +419,41 @@ function changeView(type) {
 				d3.select(node).on('input').call(node);//trigger input event on select
 			}
 		}
+		else if (currentView == viewType.LINECHART) {
+			d3.select('#scatterPlotTab').attr('selected','default');
+			d3.select('#imageSpreadTab').attr('selected','default');
+			d3.select('#linechartChartTab').attr('selected','selected');
+			view = new CINEMA_COMPONENTS.LineChart(d3.select('#viewContainer').node(),currentDb,
+				currentDbInfo.filter === undefined ? /^FILE/ : new RegExp(currentDbInfo.filter),
+				currentDbInfo.image_measures, currentDbInfo.exclude_dimension);
+				//change selected tab
+
+			view.dispatch
+				.on('selectionchanged', handleSelectionChanged)
+				.on('xchanged', function(d){savedDimensions.x = d;});
+
+				//set view to currently saved dimensions if defined
+			if (savedDimensions.x) {
+				var node = d3.select(view.xSelect).node();
+				node.value = savedDimensions.x;
+				d3.select(node).on('input').call(node);//trigger input event on select
+			}
+
+			if(typeof linechartCheckboxState !== "undefined") {
+				view.setCheckboxStates(linechartCheckboxState);
+			}
+		}
 
 		//Set mouseover handler for new view and update size
-		view.dispatch.on('mouseover',handleMouseover);
+		if (currentView != viewType.LINECHART)
+			view.dispatch.on('mouseover',handleMouseover);
+
 		updateViewContainerSize();
 		view.updateSize();
 
 		//Set view's initial selection to the current pcoord selection
-		view.setSelection(pcoord.selection.slice());
+		if (currentView != viewType.LINECHART)
+			view.setSelection(pcoord.selection.slice());
 	}
 }
 
@@ -428,7 +502,7 @@ function buildAxisOrderPanel() {
 	axisOrderPanel.append('select')
 		.attr('id','axis_value');
 
-	//Add handler to pcoord chart to set value select to "custom" 
+	//Add handler to pcoord chart to set value select to "custom"
 	//when axis order is manually changed
 	pcoord.dispatch.on('axisorderchange',function() {
 		d3.select('#axis_value').node().value = -1;
@@ -474,6 +548,13 @@ function handleMouseover(index, event) {
 			view.setHighlightedPoints([]);
 	}
 	updateInfoPane(index,event);
+}
+
+//Finalize dragging, add selection
+function handleSelectionChanged(index, event) {
+	if (currentView == viewType.LINECHART) {
+		pcoord.addSelectionByDimensionValues(view.dragResult);
+	}
 }
 
 //Update the info pane according to the index of the data
