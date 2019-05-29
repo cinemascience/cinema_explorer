@@ -55,6 +55,20 @@ To add your data to the viewer, edit **cinema/explorer/\<version\>/databases.jso
     file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
 ```
 
+## Dependencis
+
+The viewer has several dependencies, which are loaded in the normal way, through URLS. The top section of the ``cinema_explorer.html`` file contains ``<script src=...>`` clauses in the ``<head>`` section that link to the dependencies.
+
+If you are installing this viewer on a system that does not have access to the internet, you can download and install these dependencies in the ``cinema/`` directory, and change the ``src``` links to point to the internal location. Your directory structure might look something like this (the exact structure is up to you):
+
+```
+    cinema/
+        libs/
+            d3.v5.min.js
+            vtk.js
+            ...
+```
+
 ## The ``databases.json`` file
 - **databases.json** is a list of objects where each object must contain *at least* a 'name' field and 'directory' field. 'name' is the name of the databases that will be shown in the viewer. 'directory' is the path to the '.cdb' directory for your database.
 - Due to browser security features, most browsers will not read files if they are not in the same directory or in a subdirectory with **cinema_explorer.html**
