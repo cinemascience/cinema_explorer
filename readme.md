@@ -1,11 +1,12 @@
-# Cinema Spec-D Parallel Coordinates Viewer
+# Cinema::Explorer, a general viewer for Cinema, Spec D
 
-## Version 1.9
-### Author: Cameron Tauxe
-
-A Parallel Coordinates-based Viewer for Spec-D Cinema Databases
+This is a general viewer for all Cinema Databases following Specification D. 
 
 # Usage
+The viewer consists of a main ``html`` file, accompanying ``javascript``, ``css`` and ``json`` files, and several external dependencies. There are two ways to use this viewer:
+
+- If you are using it on a **system connected to the internet**, the external dependencies will be loaded automatically, through the browser.
+- If you are using it on a **system without connection to the internet**, you will need to install the external dependencies locally, per the instrucgtions below.
 
 ## Installation
 To install Cinema:Explorer, copy the **cinema_explorer.html** and **cinema/**
@@ -26,12 +27,14 @@ allow cinema applications to reside next to data, with a minimum of clutter from
 Cinema. For example:
 
 ```
-    cinema/explorer/1.9
-        css/
-        js/
-        lib/
-        license.md
-        databases.json
+    cinema/
+    	explorer/
+        	1.9/
+        		css/
+        		js/
+        		lib/
+        		license.md
+        		databases.json
 ```
 
 The cinema databases can be anywhere below the directory that contains the
@@ -46,14 +49,13 @@ The cinema databases can be anywhere below the directory that contains the
        database_03.cdb
 ```
 
-- To add your data to the viewer, edit **cinema/explorer/\<version\>/databases.json** to include references to your data.
-    - You may override the default location and name of the **databases.json**
-      by passing arguments in the URL. The file must be located at or below
-      the level of the **cinema_explorer.html** file. For example:
+To add your data to the viewer, edit **cinema/explorer/\<version\>/databases.json** to include references to your data. This is the default file that is loaded by the viewer.
+- Note: You may override the default location and name of the **databases.json** by passing arguments in the URL. The file must be located at or below the level of the **cinema_explorer.html** file. For example:
 ```
     file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
 ```
 
+## The ``databases.json`` file
 - **databases.json** is a list of objects where each object must contain *at least* a 'name' field and 'directory' field. 'name' is the name of the databases that will be shown in the viewer. 'directory' is the path to the '.cdb' directory for your database.
 - Due to browser security features, most browsers will not read files if they are not in the same directory or in a subdirectory with **cinema_explorer.html**
 - Optionally, each object in **databases.json** may contain a 'filter' field. This field is a regular expression to filter out dimensions in the database from being displayed on the chart in the viewer. Any dimension whose name matches with the regex will be filtered out.
