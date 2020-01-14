@@ -19,7 +19,7 @@ To use Cinema:Explorer, you must allow local file access. Do this in the followi
 - **Chrome** 
     - open **chrome** with the option ```--disable-web-security``` 
     - Mac example:
-        - ```open -na "Google Chrome" cinema_explorer.html --args --user-data-dir="YOUR_PATH_TO/cinema_explorer" --disable-web-security```
+        - ```open -na "Google Chrome" cinema_explorer.html --args --user-data-dir="YOUR_PATH_TO_REPO" --disable-web-security```
 
 ## Installation
 To install Cinema:Explorer, copy the **cinema_explorer.html** and **cinema/**
