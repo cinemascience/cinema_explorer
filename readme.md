@@ -13,13 +13,13 @@ To use Cinema:Explorer, you must allow local file access. Do this in the followi
 
 - **Firefox** 
     - in ```about:config```, set ```privacy.file_unique_origin``` to **false**
-- **Chrome** 
-    - from the command line, start ```chrome``` with the ```--disable-web-security``` command line option for this session
-    - Mac example:
-        - ```open -na "Google Chrome" --args --user-data-dir="YOUR_PATH_TO/cinema_explorer" --disable-web-security```
 - **Safari** 
     - Safari->Preferences->Advanced->Show Develop menu in menu bar
     - Safari->Develop->Disable Local File Restrictions (on)
+- **Chrome** 
+    - open **chrome** with the option ```--disable-web-security``` 
+    - Mac example:
+        - ```open -na "Google Chrome" --args --user-data-dir="YOUR_PATH_TO/cinema_explorer" --disable-web-security```
 
 ## Installation
 To install Cinema:Explorer, copy the **cinema_explorer.html** and **cinema/**
