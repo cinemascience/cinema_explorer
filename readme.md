@@ -9,7 +9,7 @@ The viewer consists of a main ``html`` file, accompanying ``javascript``, ``css`
 - If you are using it on a **system without connection to the internet**, you will need to install the external dependencies locally, per the instrucgtions below.
 
 ## A Note on Browser Security
-To use Cinema:Explorer, you must allow local file access. Do this in the following way:
+To use Cinema:Explorer, you must allow local file access. Do this in the following way, but be sure to reset these options when you are done:
 
 - **Firefox** 
     - in ```about:config```, set ```privacy.file_unique_origin``` to **false**
@@ -27,9 +27,9 @@ files might look like this:
 ```
    cinema_explorer.html
    cinema/
-   database_01.cdb
-   database_02.cdb
-   database_03.cdb
+       database_01.cdb
+       database_02.cdb
+       database_03.cdb
 ```
 
 The **cinema/** directory is the general directory for all cinema applications,
