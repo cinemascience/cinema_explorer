@@ -8,6 +8,15 @@ The viewer consists of a main ``html`` file, accompanying ``javascript``, ``css`
 - If you are using it on a **system connected to the internet**, the external dependencies will be loaded automatically, through the browser.
 - If you are using it on a **system without connection to the internet**, you will need to install the external dependencies locally, per the instrucgtions below.
 
+## A Note on Browser Security
+To use Cinema:Explorer, you must allow local file access. Do this in the following way:
+
+- *Firefox* in ```about:config```, set ```privacy.file_unique_origin``` to *false*
+- *Chrome* From the command line, start *chrome* with the ```--disable-web-security``` command line option for this session
+- *Safari* 
+    - Safari->Preferences->Advanced->Show Develop menu in menu bar
+    - Safari->Develop->Disable Local File Restrictions (on)
+
 ## Installation
 To install Cinema:Explorer, copy the **cinema_explorer.html** and **cinema/**
 directory to the same directory as your data. In a simple example, the installed
