@@ -50,5 +50,16 @@
 	{
 		"name" : "Big Bogus 4",
 		"directory" : "data/bogus/big_bogus_4.cdb"
+	},
+	{
+		"name" : "Example Uncertainty Bubbles",
+		"directory" : "data/uncertainty_bubbles.cdb",
+		"image_measures" : ["u_min_","u_avg_","u_max_"]
+	},
+	{
+		"name" : "Example Uncertainty Bubbles excluding min and max",
+		"directory" : "data/uncertainty_bubbles.cdb",
+		"image_measures" : ["u_avg_"],
+		"exclude_dimension" : ["u_min_","u_max_"]
 	}
 ]

@@ -88,7 +88,7 @@ If you are installing this viewer on a system that does not have access to the i
 
 - Start the viewer by opening **cinema_explorer.html** in a web browser.
 - By default, the first database listed in **databases.json** will be loaded. To load a different database, select it in the "Database Select" drop-down at the top of the page and press "Load." (For large databases (300+ rows) a warning will be displayed).
-- The viewer is split into two sections, the top section contains the Parallel Coordinates chart (called the pcoord area for brevity) and the bottom section contains a component for viewing the data, either a spread of images, or a scatter plot depending on the selected tab (this is called the view area). The two sections can be resized by click-and-dragging on the black bar between them.
+- The viewer is split into two sections, the top section contains the Parallel Coordinates chart (called the pcoord area for brevity) and the bottom section contains a component for viewing the data, either a spread of images, a scatter plot or a line chart depending on the selected tab (this is called the view area). The two sections can be resized by click-and-dragging on the black bar between them.
 
 ## Using the Paralell Coordinates Chart
 
@@ -128,10 +128,12 @@ If you are installing this viewer on a system that does not have access to the i
 
 ## Using the Line chart
 
-- Add "image_measures"/"exclude_dimension" : ["prefix1", ...] to the databases.json file to have dimension to show or to exclude comepletely
-- Show/hide dimensions using the checkboxes
-- Select an x-axis by the dropdown menu
-- Select a range on the x-axis by holding down the left mouse button and dragging it
+- Add "image_measures" : ["prefix1", ...] to the databases.json entry of your dataset to set the used image measures.
+- Add "exclude_dimension" : ["prefix1", ...] to the databases.json entry of your dataset to exclude image measures.
+- Show/hide image measures using the checkboxes. The checkboxes with bold text are grouped image measures and can be used to select or hide a group of image measures.
+- Select an x-axis by the using the dropdown menu.
+- Select a range on the x-axis by holding down the left mouse button and dragging it.
+- The line chart can only be used if the dataset has a selected image measure. One uncertainty example is included (Example Uncertainty Bubbles), where the uncertainty is used as an image measure. The u_avg_local_contrast measure is the most meaningful measure here and should be explored by hiding other measures, showing a zoomed in version of that measure.
 
 
 # Changelog
