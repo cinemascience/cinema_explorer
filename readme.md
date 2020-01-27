@@ -68,7 +68,7 @@ To add your data to the viewer, edit **cinema/explorer/\<version\>/databases.jso
     file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
 ```
 
-## Dependencis
+## Dependencies
 
 The viewer has several dependencies, which are loaded in the normal way, through URLS. The top section of the ``cinema_explorer.html`` file contains ``<script src=...>`` clauses in the ``<head>`` section that link to the dependencies.
 
