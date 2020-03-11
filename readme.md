@@ -11,8 +11,10 @@ The viewer consists of a main ``html`` file, accompanying ``javascript``, ``css`
 ## A Note on Browser Security
 To use Cinema:Explorer, you must allow local file access. Do this in the following way, but be sure to reset these options when you are done:
 
-- **Firefox** 
-    - in ```about:config```, set ```privacy.file_unique_origin``` to **false**
+- **Firefox (preferred)**
+    - type ```about:config``` in the navigaion bar
+        - set ```privacy.file_unique_origin``` to **false**
+        - set ```security.fileuri.strict_origin_policy``` to **false**
 - **Safari** 
     - Safari->Preferences->Advanced->Show Develop menu in menu bar
     - Safari->Develop->Disable Local File Restrictions (on)
