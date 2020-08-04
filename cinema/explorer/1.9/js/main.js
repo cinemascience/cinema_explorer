@@ -35,6 +35,7 @@ var currentDbInfo; //Info for the currently selected database as defined in data
 var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
 var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
 var databaseFile = 'cinema/explorer/1.9/databases.json'; //this can be overriden with HTTP params
+var singleDB = null; // possible parameter passed to load a single database, w/o databases.json
 
 var loaded = false;
 
@@ -84,32 +85,39 @@ if (urlArgs.length > 1) {
         var kvpair = urlArgPairs[i].split('=');
 
         // now look for the values you expect, and do something with them
+        //
+        // Note that this will not properly handle the case in which both parameters
+        // are set by url attributes 
         if (kvpair[0] == 'databases') {
             databaseFile = kvpair[1];
+        } else if (kvpair[0] == 'database') {
+            singleDB = kvpair[1];
         }
     }
 }
 
 //Load database file and register databases into the database selection
 //then load the first one
-var jsonRequest = new XMLHttpRequest();
-jsonRequest.open("GET",databaseFile,true);
-jsonRequest.onreadystatechange = function() {
-	if (jsonRequest.readyState === 4) {
-		if (jsonRequest.status === 200 || jsonRequest.status === 0) {
-			databaseInfo = JSON.parse(jsonRequest.responseText);
-			d3.select('#database').selectAll('option')
-				.data(databaseInfo)
-				.enter().append('option')
-					.attr('value',function(d,i){return i;})
-					.text(function(d) {
-						return d.name ? d.name: d.directory;
-					});
-			load();
-		}
-	}
+// 
+// first case, if there is no singleDB set
+if (singleDB == null) {
+    // load the requested database.json file
+    var jsonRequest = new XMLHttpRequest();
+    jsonRequest.open("GET",databaseFile,true);
+    jsonRequest.onreadystatechange = function() {
+        if (jsonRequest.readyState === 4) {
+            if (jsonRequest.status === 200 || jsonRequest.status === 0) {
+                databaseInfo = JSON.parse(jsonRequest.responseText);
+                load_databases( databaseInfo )
+            }
+        }
+    }
+    jsonRequest.send(null);
+} else {
+    // if there is a single DB set, pass that on
+    databaseInfo = JSON.parse(`[ { "name" : "test", "directory" : "${singleDB}" } ]`)
+    load_databases( databaseInfo )
 }
-jsonRequest.send(null);
 
 //init margins and image size
 updateViewContainerSize();
@@ -146,6 +154,20 @@ window.onresize = function(){
 //END MAIN THREAD
 //FUNCTION DEFINITIONS BELOW
 //*********
+
+/**
+ * load databases into the selector widget 
+ */
+function load_databases( dbs ) {
+    d3.select('#database').selectAll('option')
+        .data(dbs)
+        .enter().append('option')
+            .attr('value',function(d,i){ return i; })
+            .text(function(d) {
+                return d.name ? d.name: d.directory;
+            });
+    load();
+}
 
 /**
  * Set the current database to the one selected in the database selection
