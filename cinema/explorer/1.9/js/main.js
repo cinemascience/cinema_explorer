@@ -29,13 +29,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//Init variables
-var databaseInfo;//An array of the databases as defined in databases.json
-var currentDbInfo; //Info for the currently selected database as defined in databases.json
-var currentDb;//The currently loaded database (as CINEMA_COMPONENTS.Database instance)
-var hasAxisOrdering = false; //whether or not the currentDb has extra axis ordering data
-var databaseFile = 'cinema/explorer/1.9/databases.json'; //this can be overriden with HTTP params
-var singleDB = null; // possible parameter passed to load a single database, w/o databases.json
+//global variables
+    //An array of the databases as defined in databases.json
+var databaseInfo;  
+    //Info for the currently selected database as defined in databases.json
+var currentDbInfo; 
+    //The currently loaded database (as CINEMA_COMPONENTS.Database instance)
+var currentDb;
+    //whether or not the currentDb has extra axis ordering data
+var hasAxisOrdering = false; 
+    //this can be overriden with HTTP params
+var databaseFile = 'cinema/explorer/1.9/databases.json'; 
+    // possible parameter passed to load a single database, w/o databases.json
+var singleDB = null; 
 
 var loaded = false;
 
