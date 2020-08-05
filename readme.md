@@ -1,6 +1,6 @@
-# Cinema::Explorer, a general viewer for Cinema, Spec D
+# Cinema::Explorer, a general viewer for Cinema
 
-This is a general viewer for all Cinema Databases following Specification D. 
+This is a general viewer for all Cinema Databases following the [current Cinema specification](https://github.com/cinemascience/cinema/blob/master/specs/dietrich/01/cinema_specD_v012.pdf).
 
 # Usage
 The viewer consists of a main ``html`` file, accompanying ``javascript``, ``css`` and ``json`` files, and several external dependencies. There are two ways to use this viewer:
