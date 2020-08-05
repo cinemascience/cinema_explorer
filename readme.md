@@ -44,7 +44,7 @@ Cinema. For example:
 ```
     cinema/
     	explorer/
-        	1.9/
+        	1.10/
         		css/
         		js/
         		lib/
@@ -153,6 +153,9 @@ If you are installing this viewer on a system that does not have access to the i
 
 
 # Changelog
+## V1.10
+- added logic to URL attribute 'databases' to include both json and cdb data 
+
 ## V1.9.1
 - Update to v2.7.1 of Cinema Components Library
 - Embedded the Line Chart component as a tab

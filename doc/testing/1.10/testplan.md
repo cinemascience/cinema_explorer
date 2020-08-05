@@ -27,7 +27,7 @@ The databases.json file controls which databases are loaded into Cinema:Explorer
 
 ```
 
-path/to/cinema_explorer/cinema/explorer/1.9/databases.json
+path/to/cinema_explorer/cinema/explorer/1.10/databases.json
 
 ```
 Edit to add your databases.  The examples will be used below.
@@ -59,6 +59,10 @@ Edit to add your databases.  The examples will be used below.
 - Make a query with both the SVG and Canvas versions of the pcoord component.
 
 - Make a selection using the parallel coordinates axes by left-click and hold to select a region along an axis: ![selection.png](figures/selection.png)
+
+### Testing URL attributes
+
+- from the main repository directory, open `test.html` and click through all links in that document. These links test the use cases for each permutation of the allowed values of the `databases` attribute.
 
 ### Other checks:
 
