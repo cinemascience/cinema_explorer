@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //global variables
     //An array of the databases as defined in databases.json
-var databaseInfo;  
+var cinemaDatabases;  
     //Info for the currently selected database as defined in databases.json
 var currentDbInfo; 
     //The currently loaded database (as CINEMA_COMPONENTS.Database instance)
@@ -39,9 +39,8 @@ var currentDb;
     //whether or not the currentDb has extra axis ordering data
 var hasAxisOrdering = false; 
     //this can be overriden with HTTP params
-var databaseFile = 'cinema/explorer/1.9/databases.json'; 
-    // possible parameter passed to load a single database, w/o databases.json
-var singleDB = null; 
+var databaseList = 'cinema/explorer/1.9/databases.json'; 
+var databaseListType = 'json';
 
 var loaded = false;
 
@@ -95,34 +94,37 @@ if (urlArgs.length > 1) {
         // Note that this will not properly handle the case in which both parameters
         // are set by url attributes 
         if (kvpair[0] == 'databases') {
-            databaseFile = kvpair[1];
-        } else if (kvpair[0] == 'database') {
-            singleDB = kvpair[1];
+            databaseList = kvpair[1];
         }
     }
 }
 
+// determine what type of input we have
+set_database_list_type()
+
 //Load database file and register databases into the database selection
 //then load the first one
 // 
-// first case, if there is no singleDB set
-if (singleDB == null) {
+// first case, if there is no databaseList set
+
+if (databaseListType == "json") {
     // load the requested database.json file
     var jsonRequest = new XMLHttpRequest();
-    jsonRequest.open("GET",databaseFile,true);
+    jsonRequest.open("GET", databaseList, true);
     jsonRequest.onreadystatechange = function() {
         if (jsonRequest.readyState === 4) {
             if (jsonRequest.status === 200 || jsonRequest.status === 0) {
-                databaseInfo = JSON.parse(jsonRequest.responseText);
-                load_databases( databaseInfo )
+                cinemaDatabases = JSON.parse(jsonRequest.responseText);
+                load_databases()
             }
         }
     }
     jsonRequest.send(null);
 } else {
     // if there is a single DB set, pass that on
-    databaseInfo = JSON.parse(`[ { "name" : "test", "directory" : "${singleDB}" } ]`)
-    load_databases( databaseInfo )
+    cinemaDatabases = create_database_list( databaseList )
+    // JSON.parse(`[ { "name" : "test", "directory" : "${databaseList}" } ]`)
+    load_databases()
 }
 
 //init margins and image size
@@ -164,9 +166,9 @@ window.onresize = function(){
 /**
  * load databases into the selector widget 
  */
-function load_databases( dbs ) {
+function load_databases() {
     d3.select('#database').selectAll('option')
-        .data(dbs)
+        .data(cinemaDatabases)
         .enter().append('option')
             .attr('value',function(d,i){ return i; })
             .text(function(d) {
@@ -194,7 +196,7 @@ function load() {
 	}
 	hasAxisOrdering = false;
 
-	currentDbInfo = databaseInfo[d3.select('#database').node().value];
+	currentDbInfo = cinemaDatabases[d3.select('#database').node().value];
 	//Init Database
 	//Will call doneLoading if succesful, otherwise wil call loadingError
 	currentDb = new CINEMA_COMPONENTS.Database(
@@ -585,8 +587,10 @@ function handleSelectionChanged(index, event) {
 	}
 }
 
-//Update the info pane according to the index of the data
-//being moused over
+//
+// Update the info pane according to the index of the data
+// being moused over
+//
 function updateInfoPane(index, event) {
 	var pane = d3.select('.infoPane');
 	if (index != null && pane.empty()) {
@@ -614,3 +618,57 @@ function updateInfoPane(index, event) {
 		d3.select('.infoPane').remove();
 	}
 }
+
+//
+// inspect the databaseList to determine what type it is
+//
+function set_database_list_type() {
+    databaseList = databaseList.trim()
+
+    ext = get_file_extension( databaseList )
+
+    if (ext == "json") {
+        databaseListType = "json"
+    } else if (ext == "cdb") {
+        databaseListType = "cdb"
+    } else {
+        databaseListType = "unknown"
+        // TODO error if it's neither type
+    }
+}
+
+//
+// assuming that we have been passed a list of cinema database names
+// construct the proper data structures
+//
+function create_database_list( dbstring ) {
+    dbs = dbstring.split(",")
+    json_string = "["
+    dbs.forEach(function (item, index) {
+        cdbname = get_file_name(item)
+        json_string += `{ "name" : "${cdbname}", "directory" : "${item}" },`
+    })
+    // remove the last comma
+    json_string = json_string.substring(0, json_string.length - 1);
+    // close the string
+    json_string += "]"
+    return JSON.parse( json_string )
+}
+
+//
+// get the file name from a path string
+//
+function get_file_name(filename) {
+    nameArray = filename.split('/');
+    return nameArray[nameArray.length - 1];
+}
+
+//
+// get the file extension from a path string
+//
+function get_file_extension(filename)
+{
+  var ext = /^.+\.([^.]+)$/.exec(filename);
+  return ext == null ? "" : ext[1];
+}
+

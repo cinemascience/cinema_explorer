@@ -64,11 +64,21 @@ The cinema databases can be anywhere below the directory that contains the
        database_03.cdb
 ```
 
+## Loading your databases into the viewer
 To add your data to the viewer, edit **cinema/explorer/\<version\>/databases.json** to include references to your data. This is the default file that is loaded by the viewer.
-- Note: You may override the default location and name of the **databases.json** by passing arguments in the URL. The file must be located at or below the level of the **cinema_explorer.html** file. For example:
+
+You may override the default location and name of the **databases.json** by passing arguments in the URL. The `databases` attribute name may be used in the following ways: 
+
+- provide a properly formatted json file with one or more database paths:
 ```
     file:///Users/me/data/cinema.html?databases=somedirectory/somename.json
 ```
+- provide the path to one or more cinema databases:
+```
+    file:///Users/me/data/cinema.html?databases=somedirectory/database.cdb
+    file:///Users/me/data/cinema.html?databases=somedirectory/database.cdb,somdirectory/another.cdb
+```
+
 
 ## Dependencies
 
