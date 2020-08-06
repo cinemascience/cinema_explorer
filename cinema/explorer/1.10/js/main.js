@@ -100,7 +100,7 @@ if (urlArgs.length > 1) {
 }
 
 // determine what type of input we have
-set_database_list_type()
+databaseListType = db_get_database_list_type( databaseList )
 
 //Load database file and register databases into the database selection
 //then load the first one
@@ -620,24 +620,6 @@ function updateInfoPane(index, event) {
 }
 
 //
-// inspect the databaseList to determine what type it is
-//
-function set_database_list_type() {
-    databaseList = databaseList.trim()
-
-    ext = get_file_extension( databaseList )
-
-    if (ext == "json") {
-        databaseListType = "json"
-    } else if (ext == "cdb") {
-        databaseListType = "cdb"
-    } else {
-        databaseListType = "unknown"
-        // TODO error if it's neither type
-    }
-}
-
-//
 // assuming that we have been passed a list of cinema database names
 // construct the proper data structures
 //
@@ -645,7 +627,7 @@ function create_database_list( dbstring ) {
     dbs = dbstring.split(",")
     json_string = "["
     dbs.forEach(function (item, index) {
-        cdbname = get_file_name(item)
+        cdbname = db_get_file_name(item)
         json_string += `{ "name" : "${cdbname}", "directory" : "${item}" },`
     })
     // remove the last comma
@@ -654,21 +636,3 @@ function create_database_list( dbstring ) {
     json_string += "]"
     return JSON.parse( json_string )
 }
-
-//
-// get the file name from a path string
-//
-function get_file_name(filename) {
-    nameArray = filename.split('/');
-    return nameArray[nameArray.length - 1];
-}
-
-//
-// get the file extension from a path string
-//
-function get_file_extension(filename)
-{
-  var ext = /^.+\.([^.]+)$/.exec(filename);
-  return ext == null ? "" : ext[1];
-}
-
