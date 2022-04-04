@@ -567,15 +567,23 @@ function updateViewContainerSize() {
 //and update info pane
 //Also sets highlight in view if its a Scatter Plot
 function handleMouseover(index, event) {
-	if (index != null) {
-		pcoord.setHighlightedPaths([index]);
-		if (currentView == viewType.SCATTERPLOT)
-			view.setHighlightedPoints([index]);
-	}
-	else {
-		pcoord.setHighlightedPaths([]);
-		if (currentView == viewType.SCATTERPLOT)
-			view.setHighlightedPoints([]);
+	if (!(pcoord.freezeInfoPane || view.freezeInfoPane)) {
+		if (index != null) {
+			pcoord.setHighlightedPaths([index]);
+			if (currentView == viewType.SCATTERPLOT)
+				view.setHighlightedPoints([index]);
+			else if (currentView == viewType.IMAGESPREAD && event.fromElement instanceof SVGElement){
+				//d3.select('.dataDisplay[id='']')
+				var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
+				e.scrollIntoView()
+			}
+		} else {
+			pcoord.setHighlightedPaths([]);
+
+			if (currentView == viewType.SCATTERPLOT)
+				view.setHighlightedPoints([]);
+		}
+		updateInfoPane(index, event);
 	}
 	updateInfoPane(index,event);
 }
@@ -672,3 +680,16 @@ function get_file_extension(filename)
   return ext == null ? "" : ext[1];
 }
 
+
+function scrollToElement(element, duration = 400, delay = 0, easing = 'cubic-in-out', endCallback = () => {}) {
+	  var offsetTop = window.pageYOffset || document.documentElement.scrollTop
+	  d3.transition()
+		.each("end", endCallback)
+		.delay(delay)
+		.duration(duration)
+		.ease(easing)
+		.tween("scroll", (offset => () => {
+		  var i = d3.interpolateNumber(offsetTop, offset);
+		  return t => scrollTo(0, i(t))
+		})(offsetTop + element.getBoundingClientRect().top));
+	}
