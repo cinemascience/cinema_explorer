@@ -72,6 +72,9 @@ var currentPcoord = pcoordType.SVG;
 //State of the slideOut Panel
 var slideOutOpen = false;
 
+//last hilighted datapoint
+var lastIx = -1;
+
 // ---------------------------------------------------------------------------
 // Parse arguments that come in through the URL
 // ---------------------------------------------------------------------------
@@ -573,19 +576,26 @@ function handleMouseover(index, event) {
 			if (currentView == viewType.SCATTERPLOT)
 				view.setHighlightedPoints([index]);
 			else if (currentView == viewType.IMAGESPREAD && event.fromElement instanceof SVGElement){
-				//d3.select('.dataDisplay[id='']')
 				var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
 				e.scrollIntoView()
+				e.style.transition = 'none';
+				e.style.boxShadow = '5px 2px 2px red';
+				lastIx = index;
 			}
 		} else {
 			pcoord.setHighlightedPaths([]);
 
 			if (currentView == viewType.SCATTERPLOT)
 				view.setHighlightedPoints([]);
+			else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
+				var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
+				e.style.transition = 'box-shadow 1s ease';
+				e.style.boxShadow = 'none';
+			}
 		}
-		updateInfoPane(index, event);
+		//updateInfoPane(index, event);
 	}
-	updateInfoPane(index,event);
+	//updateInfoPane(index,event);
 }
 
 //Finalize dragging, add selection
@@ -679,17 +689,3 @@ function get_file_extension(filename)
   var ext = /^.+\.([^.]+)$/.exec(filename);
   return ext == null ? "" : ext[1];
 }
-
-
-function scrollToElement(element, duration = 400, delay = 0, easing = 'cubic-in-out', endCallback = () => {}) {
-	  var offsetTop = window.pageYOffset || document.documentElement.scrollTop
-	  d3.transition()
-		.each("end", endCallback)
-		.delay(delay)
-		.duration(duration)
-		.ease(easing)
-		.tween("scroll", (offset => () => {
-		  var i = d3.interpolateNumber(offsetTop, offset);
-		  return t => scrollTo(0, i(t))
-		})(offsetTop + element.getBoundingClientRect().top));
-	}
