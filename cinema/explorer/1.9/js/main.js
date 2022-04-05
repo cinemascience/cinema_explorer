@@ -579,7 +579,7 @@ function handleMouseover(index, event) {
 				var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
 				e.scrollIntoView()
 				e.style.transition = 'none';
-				e.style.boxShadow = '5px 2px 2px red';
+				e.style.backgroundColor = 'rgb(245, 215, 98)';
 				lastIx = index;
 			}
 		} else {
@@ -589,13 +589,11 @@ function handleMouseover(index, event) {
 				view.setHighlightedPoints([]);
 			else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
 				var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
-				e.style.transition = 'box-shadow 1s ease';
-				e.style.boxShadow = 'none';
+				e.style.transition = 'background-color 1s ease';
+				e.style.backgroundColor = 'lightgray';
 			}
 		}
-		//updateInfoPane(index, event);
 	}
-	//updateInfoPane(index,event);
 }
 
 //Finalize dragging, add selection
