@@ -570,28 +570,26 @@ function updateViewContainerSize() {
 //and update info pane
 //Also sets highlight in view if its a Scatter Plot
 function handleMouseover(index, event) {
-	if (!(pcoord.freezeInfoPane || view.freezeInfoPane)) {
-		if (index != null) {
-			pcoord.setHighlightedPaths([index]);
-			if (currentView == viewType.SCATTERPLOT)
-				view.setHighlightedPoints([index]);
-			else if (currentView == viewType.IMAGESPREAD && event.fromElement instanceof SVGElement){
-				var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
-				e.scrollIntoView()
-				e.style.transition = 'none';
-				e.style.backgroundColor = 'rgb(245, 215, 98)';
-				lastIx = index;
-			}
-		} else {
-			pcoord.setHighlightedPaths([]);
-
-			if (currentView == viewType.SCATTERPLOT)
-				view.setHighlightedPoints([]);
-			else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
-				var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
-				e.style.transition = 'background-color 1s ease';
-				e.style.backgroundColor = 'lightgray';
-			}
+	if (index != null) {
+		pcoord.setHighlightedPaths([index]);
+		if (currentView == viewType.SCATTERPLOT)
+			view.setHighlightedPoints([index]);
+		else if (currentView == viewType.IMAGESPREAD && event.fromElement instanceof SVGElement){
+			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
+			// just add a chpgtoix method on the view and call it here! if ix in cur page, do nothing
+			e.scrollIntoView()
+			e.style.transition = 'none';
+			e.style.backgroundColor = 'rgb(245,243,98)';
+			lastIx = index;
+		}
+	} else {
+		pcoord.setHighlightedPaths([]);
+		if (currentView == viewType.SCATTERPLOT)
+			view.setHighlightedPoints([]);
+		else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
+			var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
+			e.style.transition = 'background-color 1s ease';
+			e.style.backgroundColor = 'lightgray';
 		}
 	}
 }
