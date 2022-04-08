@@ -575,8 +575,8 @@ function handleMouseover(index, event) {
 		if (currentView == viewType.SCATTERPLOT)
 			view.setHighlightedPoints([index]);
 		else if (currentView == viewType.IMAGESPREAD && event.fromElement instanceof SVGElement){
+			view.goToPageWithIx(index);
 			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
-			// just add a chpgtoix method on the view and call it here! if ix in cur page, do nothing
 			e.scrollIntoView()
 			e.style.transition = 'none';
 			e.style.backgroundColor = 'rgb(245,243,98)';
