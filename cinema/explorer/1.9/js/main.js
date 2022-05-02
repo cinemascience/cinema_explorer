@@ -574,7 +574,10 @@ function handleMouseover(index, event) {
 		pcoord.setHighlightedPaths([index]);
 		if (currentView == viewType.SCATTERPLOT)
 			view.setHighlightedPoints([index]);
-		else if (currentView == viewType.IMAGESPREAD && event.fromElement instanceof SVGElement){
+		else if (currentView == viewType.IMAGESPREAD &&
+				(event.fromElement instanceof SVGElement // true if from PCoord.SVG
+					| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
+				)){
 			view.goToPageWithIx(index);
 			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
 			e.scrollIntoView()
