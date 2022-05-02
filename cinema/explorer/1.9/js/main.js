@@ -42,6 +42,9 @@ var hasAxisOrdering = false;
 var databaseList = 'cinema/explorer/1.9/databases.json'; 
 var databaseListType = 'json';
 
+//Track last highlighted datapoint (-1 -> none)
+var lastIx = -1
+
 var loaded = false;
 
 //Components
@@ -72,8 +75,6 @@ var currentPcoord = pcoordType.SVG;
 //State of the slideOut Panel
 var slideOutOpen = false;
 
-//last hilighted datapoint
-var lastIx = -1;
 
 // ---------------------------------------------------------------------------
 // Parse arguments that come in through the URL
@@ -192,6 +193,9 @@ function load() {
 	if (window.pcoord) {pcoord.destroy();}
 	if (window.view) {view.destroy();}
 	if (window.query) {query.destroy();}
+
+	//Reset last hilighted datapoint
+	lastIx = -1;
 
 	//Remove axisOrdering panel if it exists
 	if (hasAxisOrdering) {
@@ -564,6 +568,15 @@ function updateViewContainerSize() {
 	d3.select('#viewContainer').style('height',window.innerHeight-topRect.height-tabRect.height+'px');
 }
 
+
+function clearhilightedcards() {
+	if (lastIx >= 0) {
+		var e = document.querySelector('.dataDisplay[index="' + String(lastIx) + '"]')
+		e.style.transition = 'background-color 1s ease';
+		e.style.backgroundColor = 'lightgray';
+	}
+}
+
 //Respond to mouseover event.
 //Set highlight in pcoord chart
 //and update info pane
@@ -579,6 +592,7 @@ function handleMouseover(index, event) {
 				(event.srcElement instanceof SVGElement // true if from PCoord.SVG
 					| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
 				)){
+			clearhilightedcards();
 			view.goToPageWithIx(index);
 			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
 			e.scrollIntoView()
@@ -590,10 +604,8 @@ function handleMouseover(index, event) {
 		pcoord.setHighlightedPaths([]);
 		if (currentView == viewType.SCATTERPLOT)
 			view.setHighlightedPoints([]);
-		else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
-			var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
-			e.style.transition = 'background-color 1s ease';
-			e.style.backgroundColor = 'lightgray';
+		else if (currentView == viewType.IMAGESPREAD) {
+			clearhilightedcards();
 		}
 	}
 }
