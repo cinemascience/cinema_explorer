@@ -247,7 +247,6 @@ function doneLoading() {
 	pcoord.smoothPaths = d3.select('#smoothLines').node().checked;
 	if (!pcoord.smoothPaths)
 		pcoord.redrawPaths();//redraw if smoothPaths should be false
-
 	//Build view depending on selected viewType
 	if (currentView == viewType.IMAGESPREAD)
 		view = new CINEMA_COMPONENTS.ImageSpread(d3.select('#viewContainer').node(),currentDb,
@@ -574,8 +573,10 @@ function handleMouseover(index, event) {
 		pcoord.setHighlightedPaths([index]);
 		if (currentView == viewType.SCATTERPLOT)
 			view.setHighlightedPoints([index]);
+
+
 		else if (currentView == viewType.IMAGESPREAD &&
-				(event.fromElement instanceof SVGElement // true if from PCoord.SVG
+				(event.srcElement instanceof SVGElement // true if from PCoord.SVG
 					| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
 				)){
 			view.goToPageWithIx(index);
@@ -604,37 +605,6 @@ function handleSelectionChanged(index, event) {
 	}
 }
 
-//
-// Update the info pane according to the index of the data
-// being moused over
-//
-function updateInfoPane(index, event) {
-	var pane = d3.select('.infoPane');
-	if (index != null && pane.empty()) {
-		pane = d3.select('body').append('div')
-			.attr('class', 'infoPane')
-	}
-	if (index != null) {
-		pane.html(function() {
-				var text = '<b>Index:<b> '+index+'<br>';
-				var data = currentDb.data[index]
-				for (i in data) {
-					text += ('<b>'+i+':</b> ');
-					text += (data[i] + '<br>');
-				}
-				return text;
-			});
-		//Draw the info pane in the side of the window opposite the mouse
-		var leftHalf = (event.clientX <= window.innerWidth/2)
-		if (leftHalf)
-			pane.style('right', '30px');
-		else
-			pane.style('left', '30px');
-	}
-	else {
-		d3.select('.infoPane').remove();
-	}
-}
 
 //
 // inspect the databaseList to determine what type it is
