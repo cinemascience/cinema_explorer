@@ -75,7 +75,7 @@ var slideOutOpen = false;
 //last hilighted datapoint
 var lastIx = -1;
 
-//locks selection i PCoords
+//locks selection in PCoords
 var lock = false;
 
 // ---------------------------------------------------------------------------
@@ -584,9 +584,11 @@ function handleMouseover(index, event) {
 				)){
 			if (lastIx >= 0) {
 			    var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
-			    e.style.transition = 'background-color 1s ease';
-			    e.style.backgroundColor = 'lightgray';
-			    lastIx = -1;
+			    if (e != null) {
+			        e.style.transition = 'background-color 1s ease';
+			        e.style.backgroundColor = 'lightgray';
+			        lastIx = -1;
+			    }
 			}
 			view.goToPageWithIx(index);
 			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
@@ -601,9 +603,11 @@ function handleMouseover(index, event) {
 			view.setHighlightedPoints([]);
 		else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
 			var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
-			e.style.transition = 'background-color 1s ease';
-			e.style.backgroundColor = 'lightgray';
-			lastIx = -1;
+			if (e != null) {
+			    e.style.transition = 'background-color 1s ease';
+			    e.style.backgroundColor = 'lightgray';
+			    lastIx = -1;
+			}
 		}
 	}
 }
@@ -625,6 +629,7 @@ function unlock() {
 		var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
 		e.style.transition = 'background-color 1s ease';
 		e.style.backgroundColor = 'lightgray';
+		lastIx = -1;
 	}
 }
 
