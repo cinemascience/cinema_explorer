@@ -292,8 +292,10 @@ function doneLoading() {
 	//Set mouseover handler for pcoord and views component
 	pcoord.dispatch.on("mouseover",handleMouseover);
 	pcoord.dispatch.on("click",handleClick);
-	if (currentView != viewType.LINECHART)
+	if (currentView != viewType.LINECHART) {
 		view.dispatch.on('mouseover',handleMouseover);
+		view.dispatch.on("click",handleClick);
+	}
 
 	//If the view is a Scatter Plot, set listeners to save dimensions when they are changed
 	if (currentView == viewType.SCATTERPLOT) {
@@ -425,6 +427,16 @@ function changeView(type) {
 			if(typeof imagespreadOptionsState !== "undefined") {
 				view.setOptionsData(imagespreadOptionsState);
 			}
+
+            console.log(pcoord.highlighted)
+            index = pcoord.highlighted[0];
+			view.goToPageWithIx(index);
+			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
+			if (e != null) {
+			    e.scrollIntoView()
+			    e.style.transition = 'none';
+			    e.style.backgroundColor = 'rgb(245,243,98)';
+			}
 		}
 		//Build ScatterPlot if Scatter Plot tab is selected
 		else if (currentView == viewType.SCATTERPLOT) {
@@ -455,6 +467,7 @@ function changeView(type) {
 				node.value = savedDimensions.y;
 				d3.select(node).on('input').call(node);//trigger input event on select
 			}
+			view.setHighlightedPoints(pcoord.highlighted);
 		}
 		else if (currentView == viewType.LINECHART) {
 			d3.select('#scatterPlotTab').attr('selected','default');
@@ -482,8 +495,10 @@ function changeView(type) {
 		}
 
 		//Set mouseover handler for new view and update size
-		if (currentView != viewType.LINECHART)
+		if (currentView != viewType.LINECHART) {
 			view.dispatch.on('mouseover',handleMouseover);
+			view.dispatch.on('click',handleClick);
+		}
 
 		updateViewContainerSize();
 		view.updateSize();
@@ -581,7 +596,7 @@ function handleMouseover(index, event) {
 		else if (currentView == viewType.IMAGESPREAD &&
 				(event.fromElement instanceof SVGElement // true if from PCoord.SVG
 					| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
-				)){
+			    )){
 			if (lastIx >= 0) {
 			    var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
 			    if (e != null) {
@@ -615,7 +630,17 @@ function handleMouseover(index, event) {
 // locks mouseover behavior over a selected path
 function handleClick(index, event) {
     if (index != null) {
-        lock = true;
+        if (currentView == viewType.IMAGESPREAD && lock == false &&
+			!(event.fromElement instanceof SVGElement // true if from PCoord.SVG
+				| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
+			)) {
+			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
+			e.scrollIntoView()
+			e.style.transition = 'none';
+			e.style.backgroundColor = 'rgb(245,243,98)';
+			lastIx = index;
+		}
+		lock = true;
     }
 }
 
