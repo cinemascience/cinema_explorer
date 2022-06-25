@@ -427,16 +427,6 @@ function changeView(type) {
 			if(typeof imagespreadOptionsState !== "undefined") {
 				view.setOptionsData(imagespreadOptionsState);
 			}
-
-            console.log(pcoord.highlighted)
-            index = pcoord.highlighted[0];
-			view.goToPageWithIx(index);
-			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
-			if (e != null) {
-			    e.scrollIntoView()
-			    e.style.transition = 'none';
-			    e.style.backgroundColor = 'rgb(245,243,98)';
-			}
 		}
 		//Build ScatterPlot if Scatter Plot tab is selected
 		else if (currentView == viewType.SCATTERPLOT) {
@@ -506,6 +496,16 @@ function changeView(type) {
 		//Set view's initial selection to the current pcoord selection
 		if (currentView != viewType.LINECHART)
 			view.setSelection(pcoord.selection.slice());
+		if (currentView == viewType.IMAGESPREAD) {
+		    index = pcoord.highlighted[0];
+			view.goToPageWithIx(index);
+			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
+			if (e != null) {
+			    e.scrollIntoView()
+			    e.style.transition = 'none';
+			    e.style.backgroundColor = 'rgb(245,243,98)';
+			}
+		}
 	}
 }
 
@@ -591,8 +591,10 @@ function updateViewContainerSize() {
 function handleMouseover(index, event) {
 	if (index != null && !lock) {
 		pcoord.setHighlightedPaths([index]);
-		if (currentView == viewType.SCATTERPLOT)
+		if (currentView == viewType.SCATTERPLOT) {
 			view.setHighlightedPoints([index]);
+			lastIx = index;
+		}
 		else if (currentView == viewType.IMAGESPREAD &&
 				(event.fromElement instanceof SVGElement // true if from PCoord.SVG
 					| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
@@ -652,9 +654,11 @@ function unlock() {
 		view.setHighlightedPoints([]);
 	else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
 		var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
-		e.style.transition = 'background-color 1s ease';
-		e.style.backgroundColor = 'lightgray';
-		lastIx = -1;
+		if (e != null) {
+			e.style.transition = 'background-color 1s ease';
+			e.style.backgroundColor = 'lightgray';
+	        lastIx = -1;
+		}
 	}
 }
 
