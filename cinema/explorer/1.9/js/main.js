@@ -76,6 +76,9 @@ var currentPcoord = pcoordType.SVG;
 var slideOutOpen = false;
 
 
+//locks selection in PCoords
+var lock = false;
+
 // ---------------------------------------------------------------------------
 // Parse arguments that come in through the URL
 // ---------------------------------------------------------------------------
@@ -96,7 +99,7 @@ if (urlArgs.length > 1) {
         // now look for the values you expect, and do something with them
         //
         // Note that this will not properly handle the case in which both parameters
-        // are set by url attributes 
+        // are set by url attributes
         if (kvpair[0] == 'databases') {
             databaseList = kvpair[1];
         }
@@ -108,7 +111,7 @@ set_database_list_type()
 
 //Load database file and register databases into the database selection
 //then load the first one
-// 
+//
 // first case, if there is no databaseList set
 
 if (databaseListType == "json") {
@@ -168,7 +171,7 @@ window.onresize = function(){
 //*********
 
 /**
- * load databases into the selector widget 
+ * load databases into the selector widget
  */
 function load_databases() {
     d3.select('#database').selectAll('option')
@@ -291,6 +294,7 @@ function doneLoading() {
 
 	//Set mouseover handler for pcoord and views component
 	pcoord.dispatch.on("mouseover",handleMouseover);
+	pcoord.dispatch.on("click",handleClick);
 	if (currentView != viewType.LINECHART)
 		view.dispatch.on('mouseover',handleMouseover);
 
@@ -568,21 +572,12 @@ function updateViewContainerSize() {
 	d3.select('#viewContainer').style('height',window.innerHeight-topRect.height-tabRect.height+'px');
 }
 
-
-function clearhilightedcards() {
-	if (lastIx >= 0) {
-		var e = document.querySelector('.dataDisplay[index="' + String(lastIx) + '"]')
-		e.style.transition = 'background-color 1s ease';
-		e.style.backgroundColor = 'lightgray';
-	}
-}
-
 //Respond to mouseover event.
 //Set highlight in pcoord chart
 //and update info pane
 //Also sets highlight in view if its a Scatter Plot
 function handleMouseover(index, event) {
-	if (index != null) {
+	if (index != null && !lock) {
 		pcoord.setHighlightedPaths([index]);
 		if (currentView == viewType.SCATTERPLOT)
 			view.setHighlightedPoints([index]);
@@ -592,7 +587,14 @@ function handleMouseover(index, event) {
 				(event.srcElement instanceof SVGElement // true if from PCoord.SVG
 					| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
 				)){
-			clearhilightedcards();
+			if (lastIx >= 0) {
+			    var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
+			    if (e != null) {
+			        e.style.transition = 'background-color 1s ease';
+			        e.style.backgroundColor = 'lightgray';
+			        lastIx = -1;
+			    }
+			}
 			view.goToPageWithIx(index);
 			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
 			e.scrollIntoView()
@@ -600,13 +602,39 @@ function handleMouseover(index, event) {
 			e.style.backgroundColor = 'rgb(245,243,98)';
 			lastIx = index;
 		}
-	} else {
+	} else if (!lock) {
 		pcoord.setHighlightedPaths([]);
 		if (currentView == viewType.SCATTERPLOT)
 			view.setHighlightedPoints([]);
-		else if (currentView == viewType.IMAGESPREAD) {
-			clearhilightedcards();
+		else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
+			var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
+			if (e != null) {
+			    e.style.transition = 'background-color 1s ease';
+			    e.style.backgroundColor = 'lightgray';
+			    lastIx = -1;
+			}
 		}
+	}
+}
+
+// locks mouseover behavior over a selected path
+function handleClick(index, event) {
+    if (index != null) {
+        lock = true;
+    }
+}
+
+// unlocks mouseover behavior and resets highlight
+function unlock() {
+    lock = false;
+	pcoord.setHighlightedPaths([]);
+	if (currentView == viewType.SCATTERPLOT)
+		view.setHighlightedPoints([]);
+	else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
+		var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
+		e.style.transition = 'background-color 1s ease';
+		e.style.backgroundColor = 'lightgray';
+		lastIx = -1;
 	}
 }
 
