@@ -637,7 +637,8 @@ function handleClick(index, event) {
 				| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
 			)) {
 			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
-			e.scrollIntoView()
+			if (event.currentTarget.getAttribute('class') !== 'detailDisplay')
+				e.scrollIntoView()
 			e.style.transition = 'none';
 			e.style.backgroundColor = 'rgb(245,243,98)';
 			lastIx = index;
