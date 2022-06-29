@@ -295,8 +295,10 @@ function doneLoading() {
 	//Set mouseover handler for pcoord and views component
 	pcoord.dispatch.on("mouseover",handleMouseover);
 	pcoord.dispatch.on("click",handleClick);
-	if (currentView != viewType.LINECHART)
+	if (currentView != viewType.LINECHART) {
 		view.dispatch.on('mouseover',handleMouseover);
+		view.dispatch.on("click",handleClick);
+	}
 
 	//If the view is a Scatter Plot, set listeners to save dimensions when they are changed
 	if (currentView == viewType.SCATTERPLOT) {
@@ -458,6 +460,7 @@ function changeView(type) {
 				node.value = savedDimensions.y;
 				d3.select(node).on('input').call(node);//trigger input event on select
 			}
+			view.setHighlightedPoints(pcoord.highlighted);
 		}
 		else if (currentView == viewType.LINECHART) {
 			d3.select('#scatterPlotTab').attr('selected','default');
@@ -485,8 +488,10 @@ function changeView(type) {
 		}
 
 		//Set mouseover handler for new view and update size
-		if (currentView != viewType.LINECHART)
+		if (currentView != viewType.LINECHART) {
 			view.dispatch.on('mouseover',handleMouseover);
+			view.dispatch.on('click',handleClick);
+		}
 
 		updateViewContainerSize();
 		view.updateSize();
@@ -494,6 +499,16 @@ function changeView(type) {
 		//Set view's initial selection to the current pcoord selection
 		if (currentView != viewType.LINECHART)
 			view.setSelection(pcoord.selection.slice());
+		if (currentView == viewType.IMAGESPREAD) {
+		    index = pcoord.highlighted[0];
+			view.goToPageWithIx(index);
+			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
+			if (e != null) {
+			    e.scrollIntoView()
+			    e.style.transition = 'none';
+			    e.style.backgroundColor = 'rgb(245,243,98)';
+			}
+		}
 	}
 }
 
@@ -579,14 +594,14 @@ function updateViewContainerSize() {
 function handleMouseover(index, event) {
 	if (index != null && !lock) {
 		pcoord.setHighlightedPaths([index]);
-		if (currentView == viewType.SCATTERPLOT)
+		if (currentView == viewType.SCATTERPLOT) {
 			view.setHighlightedPoints([index]);
-
-
+			lastIx = index;
+		}
 		else if (currentView == viewType.IMAGESPREAD &&
 				(event.srcElement instanceof SVGElement // true if from PCoord.SVG
 					| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
-				)){
+			    )){
 			if (lastIx >= 0) {
 			    var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
 			    if (e != null) {
@@ -620,7 +635,18 @@ function handleMouseover(index, event) {
 // locks mouseover behavior over a selected path
 function handleClick(index, event) {
     if (index != null) {
-        lock = true;
+        if (currentView == viewType.IMAGESPREAD && lock == false &&
+			!(event.fromElement instanceof SVGElement // true if from PCoord.SVG
+				| event.currentTarget.getAttribute('class') == 'pathContainer' // true if from PCoord.Canvas
+			)) {
+			var e = document.querySelector('.dataDisplay[index="' + String(index) +'"]')
+			if (event.currentTarget.getAttribute('class') !== 'detailDisplay')
+				e.scrollIntoView()
+			e.style.transition = 'none';
+			e.style.backgroundColor = 'rgb(245,243,98)';
+			lastIx = index;
+		}
+		lock = true;
     }
 }
 
@@ -632,9 +658,11 @@ function unlock() {
 		view.setHighlightedPoints([]);
 	else if (currentView == viewType.IMAGESPREAD && lastIx >= 0) {
 		var e = document.querySelector('.dataDisplay[index="' + String(lastIx) +'"]')
-		e.style.transition = 'background-color 1s ease';
-		e.style.backgroundColor = 'lightgray';
-		lastIx = -1;
+		if (e != null) {
+			e.style.transition = 'background-color 1s ease';
+			e.style.backgroundColor = 'lightgray';
+	        lastIx = -1;
+		}
 	}
 }
 
