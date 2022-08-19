@@ -58,12 +58,17 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <!-- external -->
 	<script src="https://d3js.org/d3.v5.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/vtk.js"></script>
+	<script src="https://3Dmol.org/build/3Dmol-min.js" async></script>
 
     <!-- components -->
-	<link rel='stylesheet' href='https://cinemascience.github.io/release/CinemaComponents.v2.7.1.min.css'>
-	<script src='https://cinemascience.github.io/release/CinemaComponents.v2.7.1.min.js'></script>
+	<link rel='stylesheet' href='https://miketynes.github.io/cinema_components/build/CinemaComponents.v2.7.1.min.css'>
+	<script src='https://miketynes.github.io/cinema_components/build/CinemaComponents.v2.7.1.js'></script>
 
-	<!-- alternative local components files (for testing builds) (please comment this out before commiting)-->
+	<!-- Alternative for local builds presuming both repos share a parent directory (please comment before committing) -->
+	<!-- <link rel='stylesheet' href='../cinema_components/build/CinemaComponents.v2.7.1.min.css'> -->
+	<!-- <script src='../cinema_components/build/CinemaComponents.v2.7.1.js'></script> -->
+
+	<!-- Alternative local components files (for testing builds) (please comment this out before committing)-->
 	<!--
 	<link rel='stylesheet' href='test/CinemaComponents.min.css'>
 	<script src='test/CinemaComponents.js'></script>
@@ -99,6 +104,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 			<div id="pcoordContainer"></div>
 			<!--readout for the number of results currently selected-->
 			<div id="selectionStats"></div>
+			<!--button to unlock mouseover behavior-->
+			<button id="unlockButton" onclick="unlock()">Unlock</button>
 			<!--Checkbox for toggling smooth lines on the chart-->
 			<div id="smoothLinesWrapper">
 				<input id="smoothLines" type="checkbox" checked="checked" oninput="updateSmoothLines()">Smooth Lines</input>
