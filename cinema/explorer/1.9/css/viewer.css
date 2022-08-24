@@ -127,7 +127,20 @@ body {
 	right: 10px;
 	font-size: 12px;
 }
-
+#unlockButton {
+	position: absolute;
+	border: 2px solid dimgrey;
+	border-width: 1px;
+  	border-radius: 5px;
+	bottom: 50px;
+	right: 50px;
+	width: 60px;
+	padding: 2px 5px 5px 2px;
+	background-color: #e2e2e2;
+}
+#unlockButton:hover {
+	background-color: lightgray;;
+}
 #selectionStats {
 	position: absolute;
 	bottom: 0px;

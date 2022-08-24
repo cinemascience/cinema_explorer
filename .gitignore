@@ -5,3 +5,35 @@ databases_toIgnore.json
 getBuild.sh
 copyCSS.sh
 test/
+.idea/
+AutofillRegex/
+AutofillStates/
+BrowserMetrics-spare.pma
+CertificateRevocation/
+ClientSidePhishing/
+Crowd Deny/
+Default/
+DesktopSharingHub/
+FileTypePolicies/
+First Run
+FirstPartySetsPreloaded/
+Floc/
+Last Version
+Local State
+MEIPreload/
+OnDeviceHeadSuggestModel/
+OptimizationGuidePredictionModels/
+OptimizationHints/
+OriginTrials/
+PKIMetadata/
+RunningChromeVersion
+SSLErrorAssistant/
+Safe Browsing/
+SafetyTips/
+SingletonCookie
+SingletonLock
+SingletonSocket
+Subresource Filter/
+TrustTokenKeyCommitments/
+ZxcvbnData/
+pnacl/
